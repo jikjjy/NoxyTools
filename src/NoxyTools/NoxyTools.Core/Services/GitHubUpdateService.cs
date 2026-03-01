@@ -163,68 +163,74 @@ public class GitHubUpdateService : IDisposable
                 using var response = await _httpClient.SendAsync(
                     request, HttpCompletionOption.ResponseHeadersRead, ct);
 
-                if (response.StatusCode == System.Net.HttpStatusCode.OK)
-                    resumeOffset = 0;  // 서버가 전체 재전송
-
-                response.EnsureSuccessStatusCode();
-
-                var totalBytes = (response.Content.Headers.ContentLength ?? -1L) + resumeOffset;
-
-                using var srcStream  = await response.Content.ReadAsStreamAsync(ct);
-                using var destStream = new FileStream(tempPath,
-                    resumeOffset > 0 ? FileMode.Append : FileMode.Create,
-                    FileAccess.Write, FileShare.None, 81920, true);
-
-                var buffer    = new byte[81920];
-                long bytesRead = resumeOffset;
-                int read;
-
-                while ((read = await srcStream.ReadAsync(buffer, ct)) > 0)
+                // 416: .part 파일 offset이 서버 파일 크기를 초과 → 처음부터 재시도
+                if (response.StatusCode == System.Net.HttpStatusCode.RequestedRangeNotSatisfiable)
                 {
-                    await destStream.WriteAsync(buffer.AsMemory(0, read), ct);
-                    bytesRead += read;
-                    if (totalBytes > 0)
-                        progress?.Report((int)(bytesRead * 100L / totalBytes));
+                    if (File.Exists(tempPath)) File.Delete(tempPath);
+                    resumeOffset = 0;
+                    var retryRequest = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
+                    using var retryResponse = await _httpClient.SendAsync(
+                        retryRequest, HttpCompletionOption.ResponseHeadersRead, ct);
+                    retryResponse.EnsureSuccessStatusCode();
+                    await WriteStreamAsync(retryResponse, tempPath, destPath, 0, progress, ct);
+                    return;
                 }
 
-                progress?.Report(100);
-                if (File.Exists(destPath)) File.Delete(destPath);
-                File.Move(tempPath, destPath);
+                if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    resumeOffset = 0;  // 서버가 전체 재전송 (Range 미지원)
+
+                response.EnsureSuccessStatusCode();
+                await WriteStreamAsync(response, tempPath, destPath, resumeOffset, progress, ct);
                 return;  // 성공
             }
             catch (OperationCanceledException) { throw; }
-            catch (Exception) when (attempt < maxRetries)
+            catch when (attempt < maxRetries)
             {
-                // 지수 백오프: 2s / 4s / 8s …
+                // 지수 백오프: 2s / 4s …
                 await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt)), ct);
             }
         }
 
         // 마지막 시도 – 예외 전파
-        long lastOffset = File.Exists(tempPath) ? new FileInfo(tempPath).Length : 0;
+        if (File.Exists(tempPath)) File.Delete(tempPath);  // 손상된 .part 정리 후 처음부터
         var lastReq = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
-        if (lastOffset > 0)
-            lastReq.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(lastOffset, null);
-
         using var lastResp = await _httpClient.SendAsync(
             lastReq, HttpCompletionOption.ResponseHeadersRead, ct);
-        if (lastResp.StatusCode == System.Net.HttpStatusCode.OK) lastOffset = 0;
         lastResp.EnsureSuccessStatusCode();
+        await WriteStreamAsync(lastResp, tempPath, destPath, 0, progress, ct);
+    }
 
-        long lastTotal = (lastResp.Content.Headers.ContentLength ?? -1L) + lastOffset;
-        using var lSrc  = await lastResp.Content.ReadAsStreamAsync(ct);
-        using var lDest = new FileStream(tempPath,
-            lastOffset > 0 ? FileMode.Append : FileMode.Create,
+    private static async Task WriteStreamAsync(
+        HttpResponseMessage response,
+        string tempPath,
+        string destPath,
+        long resumeOffset,
+        IProgress<int>? progress,
+        CancellationToken ct)
+    {
+        var totalBytes = (response.Content.Headers.ContentLength ?? -1L) + resumeOffset;
+
+        using var srcStream  = await response.Content.ReadAsStreamAsync(ct);
+        using var destStream = new FileStream(tempPath,
+            resumeOffset > 0 ? FileMode.Append : FileMode.Create,
             FileAccess.Write, FileShare.None, 81920, true);
 
-        var buf = new byte[81920]; long lRead = lastOffset; int r;
-        while ((r = await lSrc.ReadAsync(buf, ct)) > 0)
+        var buffer = new byte[81920];
+        long bytesRead = resumeOffset;
+        int read;
+
+        while ((read = await srcStream.ReadAsync(buffer, ct)) > 0)
         {
-            await lDest.WriteAsync(buf.AsMemory(0, r), ct);
-            lRead += r;
-            if (lastTotal > 0) progress?.Report((int)(lRead * 100L / lastTotal));
+            await destStream.WriteAsync(buffer.AsMemory(0, read), ct);
+            bytesRead += read;
+            if (totalBytes > 0)
+                progress?.Report((int)(bytesRead * 100L / totalBytes));
         }
+
         progress?.Report(100);
+        await destStream.FlushAsync(ct);
+        destStream.Close();
+
         if (File.Exists(destPath)) File.Delete(destPath);
         File.Move(tempPath, destPath);
     }

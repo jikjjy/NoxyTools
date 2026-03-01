@@ -66,4 +66,27 @@ public partial class MainWindow : Window
         _config.MainWindowLocation = new System.Drawing.Point((int)bounds.X, (int)bounds.Y);
         _config.MainWindowSize     = new System.Drawing.Size((int)bounds.Width, (int)bounds.Height);
     }
+
+    // ── 커스텀 타이틀 바 ─────────────────────────────────────────
+
+    protected override void OnStateChanged(EventArgs e)
+    {
+        base.OnStateChanged(e);
+        MaxRestoreButton.Content = WindowState == WindowState.Maximized ? "❐" : "□";
+        MaxRestoreButton.ToolTip = WindowState == WindowState.Maximized ? "복원" : "최대화";
+    }
+
+    private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        => SystemCommands.MinimizeWindow(this);
+
+    private void MaxRestoreButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (WindowState == WindowState.Maximized)
+            SystemCommands.RestoreWindow(this);
+        else
+            SystemCommands.MaximizeWindow(this);
+    }
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e)
+        => SystemCommands.CloseWindow(this);
 }

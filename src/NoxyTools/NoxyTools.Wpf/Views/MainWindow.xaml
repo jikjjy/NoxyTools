@@ -13,6 +13,7 @@
         Width="1100" Height="700"
         MinWidth="800" MinHeight="500"
         WindowStartupLocation="Manual"
+        WindowStyle="None"
         Background="{StaticResource PanelBackgroundBrush}">
 
     <Window.Resources>
@@ -32,6 +33,13 @@
         </DataTemplate>
     </Window.Resources>
 
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="30"
+                      ResizeBorderThickness="4"
+                      UseAeroCaptionButtons="False"
+                      GlassFrameThickness="0"/>
+    </WindowChrome.WindowChrome>
+
     <DockPanel>
 
         <!-- ============================================================ -->
@@ -42,9 +50,28 @@
                 BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="0,0,0,1">
             <DockPanel>
+                <!-- 윈도우 컨트롤 버튼: 최소화 / 최대화 / 닫기 (최우측) -->
+                <StackPanel DockPanel.Dock="Right"
+                            Orientation="Horizontal"
+                            WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button Style="{StaticResource TitleBarButtonStyle}"
+                            Content="─"
+                            ToolTip="최소화"
+                            Click="MinimizeButton_Click"/>
+                    <Button x:Name="MaxRestoreButton"
+                            Style="{StaticResource TitleBarButtonStyle}"
+                            Content="□"
+                            ToolTip="최대화"
+                            Click="MaxRestoreButton_Click"/>
+                    <Button Style="{StaticResource TitleBarCloseButtonStyle}"
+                            Content="✕"
+                            ToolTip="닫기"
+                            Click="CloseButton_Click"/>
+                </StackPanel>
+
                 <!-- 앱 아이콘/타이틀 -->
                 <TextBlock DockPanel.Dock="Left"
-                           Text="⚙ NoxyTools"
+                           Text="◈ NoxyTools"
                            Foreground="{StaticResource AccentTextBrush}"
                            FontWeight="Bold"
                            FontSize="13"
@@ -57,28 +84,36 @@
                            Foreground="{StaticResource SecondaryTextBrush}"
                            FontSize="11"
                            VerticalAlignment="Center"
-                           Margin="12,0"/>
+                           Margin="8,0"
+                           WindowChrome.IsHitTestVisibleInChrome="True"/>
 
-                <!-- 설정 백업 / 복구 버튼 (우측 정렬) -->
+                <!-- 설정 백업 / 복구 / 업데이트 버튼 (우측 정렬) -->
                 <StackPanel DockPanel.Dock="Right"
                             Orientation="Horizontal"
-                            VerticalAlignment="Center"
-                            Margin="0,0,4,0">
+                            VerticalAlignment="Stretch"
+                            Margin="0,0,4,0"
+                            WindowChrome.IsHitTestVisibleInChrome="True">
                     <Button Content="⬆ 백업"
                             Command="{Binding BackupSettingsCommand}"
                             ToolTip="설정을 파일로 백업합니다"
-                            Width="64" Height="22" FontSize="11"
+                            FontSize="11"
                             Margin="0,0,3,0"/>
                     <Button Content="⬇ 복구"
                             Command="{Binding RestoreSettingsCommand}"
                             ToolTip="파일에서 설정을 복구합니다"
-                            Width="64" Height="22" FontSize="11"/>
+                            FontSize="11"
+                            Margin="0,0,3,0"/>
+                    <Button Content="🔔 업데이트"
+                            Command="{Binding CheckForUpdateManualCommand}"
+                            ToolTip="최신 버전을 확인합니다"
+                            FontSize="11"/>
                 </StackPanel>
 
                 <!-- 탭 버튼 -->
                 <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Left">
-                    <RadioButton Content="검증 보고서"
+                            HorizontalAlignment="Left"
+                            WindowChrome.IsHitTestVisibleInChrome="True">
+                    <RadioButton Content="아이템 인증 도우미"
                                  Style="{StaticResource TabRadioButtonStyle}"
                                  IsChecked="{Binding IsMakeValidReportSelected}"
                                  Command="{Binding SelectMakeValidReportCommand}"/>

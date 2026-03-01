@@ -4,6 +4,7 @@ using NoxyTools.Core.Model;
 using NoxyTools.Core.Services;
 using NoxyTools.Wpf.Services;
 using NoxyTools.Wpf.ViewModels.Base;
+using NoxyTools.Wpf.Views;
 using System;
 using System.IO;
 using System.Reflection;
@@ -21,6 +22,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly MakeValidReportViewModel  _makeValidReportVm;
     private readonly NoxypediaSearchViewModel _noxypediaSearchVm;
     private readonly ItemSimulatorViewModel    _itemSimulatorVm;
+    private readonly UpdateViewModel           _updateVm;
 
     private DispatcherTimer? _statusTimer;
     private DispatcherTimer? _loadingTimer;
@@ -57,7 +59,8 @@ public partial class MainViewModel : ViewModelBase
         ConfigService config,
         MakeValidReportViewModel  makeValidReportVm,
         NoxypediaSearchViewModel noxypediaSearchVm,
-        ItemSimulatorViewModel    itemSimulatorVm)
+        ItemSimulatorViewModel    itemSimulatorVm,
+        UpdateViewModel           updateVm)
     {
         _navigation = navigation;
         _cache = cache;
@@ -65,6 +68,7 @@ public partial class MainViewModel : ViewModelBase
         _makeValidReportVm = makeValidReportVm;
         _noxypediaSearchVm = noxypediaSearchVm;
         _itemSimulatorVm   = itemSimulatorVm;
+        _updateVm          = updateVm;
 
         var ver = Assembly.GetEntryAssembly()?.GetName().Version;
         AppVersion = ver is not null ? $"v{ver.Major}.{ver.Minor}.{ver.Build}" : "v?.?.?";
@@ -232,6 +236,28 @@ public partial class MainViewModel : ViewModelBase
         if (IsMakeValidReportSelected)      SelectMakeValidReport();
         else if (IsNoxypediaSearchSelected) SelectNoxypediaSearch();
         else if (IsItemSimulatorSelected)   SelectItemSimulator();
+    }
+
+    // --- 업데이트 확인 ---
+
+    [RelayCommand]
+    private async Task CheckForUpdateManualAsync()
+    {
+        SetStatus("업데이트 확인 중...");
+        await _updateVm.CheckForUpdateCommand.ExecuteAsync(null);
+
+        if (!_updateVm.IsUpdateAvailable)
+        {
+            SetStatus(_updateVm.StatusMessage, 4000);
+            return;
+        }
+
+        var win = new UpdateWindow(_updateVm)
+        {
+            Owner = Application.Current.MainWindow
+        };
+        win.ShowDialog();
+        SetStatus("준비");
     }
 
     // --- 앱 종료 처리 ---
