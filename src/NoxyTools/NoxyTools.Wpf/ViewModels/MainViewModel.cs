@@ -73,7 +73,7 @@ public partial class MainViewModel : ViewModelBase
         var ver = Assembly.GetEntryAssembly()?.GetName().Version;
         AppVersion = ver is not null ? $"v{ver.Major}.{ver.Minor}.{ver.Build}" : "v?.?.?";
 
-        // 초기 화면: 검증 보고서
+        // 초기 화면: 아이템 인증 도우미
         SelectMakeValidReport();
     }
 
@@ -153,7 +153,7 @@ public partial class MainViewModel : ViewModelBase
         IsNoxypediaSearchSelected = false;
         IsItemSimulatorSelected = false;
         _navigation.NavigateTo<MakeValidReportViewModel>();
-        SetStatus("검증 보고서");
+        SetStatus("아이템 인증 도우미");
     }
 
     [RelayCommand]

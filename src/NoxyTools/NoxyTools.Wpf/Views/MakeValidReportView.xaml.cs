@@ -58,6 +58,14 @@ public partial class MakeValidReportView : UserControl
         }
     }
 
+    private void SavePathTextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (sender is not TextBox tb) return;
+        tb.CaretIndex = tb.Text.Length;
+        if (tb.Template?.FindName("PART_ContentHost", tb) is ScrollViewer sv)
+            sv.ScrollToRightEnd();
+    }
+
     private void CafeHyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
     {
         Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });

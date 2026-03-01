@@ -173,7 +173,7 @@ namespace NoxyTools.Core.Services
         }
 
         /// <summary>
-        /// 검증 보고서를 HTML 프래그먼트로 내보냅니다.
+        /// 아이템 인증 도우미를 HTML 프래그먼트로 내보냅니다.
         /// 등급색 인라인 스타일을 포함하므로 네이버 카페 등 웹 에디터에서 색상이 보존됩니다.
         /// </summary>
         public static string ExportToHtml(this StatisticsService statistics, ConfigService config)

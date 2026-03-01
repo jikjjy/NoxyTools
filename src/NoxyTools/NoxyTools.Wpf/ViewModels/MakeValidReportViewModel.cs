@@ -17,7 +17,7 @@ using System.Windows.Threading;
 namespace NoxyTools.Wpf.ViewModels;
 
 /// <summary>
-/// 검증 보고서 탭 ViewModel — 카페 업로드용 검증 보고서 생성
+/// 아이템 인증 도우미 탭 ViewModel — 카페 업로드용 아이템 인증 도우미 생성
 /// </summary>
 public partial class MakeValidReportViewModel : ViewModelBase
 {

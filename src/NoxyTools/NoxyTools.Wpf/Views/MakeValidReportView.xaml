@@ -60,9 +60,11 @@
                                 Margin="4,0,0,0"
                                 Command="{Binding ChangeSavePathCommand}"
                                 Style="{StaticResource SpeedButtonStyle}"/>
-                        <TextBox Text="{Binding SavePath, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBox x:Name="SavePathTextBox"
+                                 Text="{Binding SavePath, UpdateSourceTrigger=PropertyChanged}"
                                  IsReadOnly="True"
-                                 ToolTip="{Binding SavePath}"/>
+                                 ToolTip="{Binding SavePath}"
+                                 TextChanged="SavePathTextBox_TextChanged"/>
                     </DockPanel>
 
                     <!-- 옵션 -->
