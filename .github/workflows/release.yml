@@ -37,16 +37,12 @@ jobs:
       - name: Patch version in csproj
         shell: pwsh
         run: |
-          $ver     = "${{ steps.version.outputs.VER }}"
-          $verFull = "$ver.0"   # 4-part 버전 (0.2.0 → 0.2.0.0)
-          $csproj  = "src/NoxyTools/NoxyTools.Wpf/NoxyTools.Wpf.csproj"
+          $ver    = "${{ steps.version.outputs.VER }}"
+          $csproj = "src/NoxyTools/NoxyTools.Wpf/NoxyTools.Wpf.csproj"
 
-          [xml]$xml = Get-Content $csproj
-          $pg = $xml.Project.PropertyGroup | Where-Object { $_.AssemblyVersion } | Select-Object -First 1
-          $pg.Version         = $ver
-          $pg.AssemblyVersion = $verFull
-          $pg.FileVersion     = $verFull
-          $xml.Save((Resolve-Path $csproj))
+          $content = Get-Content $csproj -Raw
+          $content = $content -replace '<Version>[^<]*</Version>', "<Version>$ver</Version>"
+          Set-Content $csproj $content -NoNewline
           Write-Host "Patched $csproj to version $ver"
 
       # ── 5. NuGet 복원 ─────────────────────────────────────────────
