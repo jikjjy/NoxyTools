@@ -17,8 +17,8 @@ packages/
 *.log
 
 ## Temp / CI intermediate
-Setup/output/
-Setup/MakeSetup.CI.iss
+src/Setup/output/
+src/Setup/MakeSetup.CI.iss
 
 ## OS files
 Thumbs.db

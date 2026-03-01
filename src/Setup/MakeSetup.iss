@@ -22,7 +22,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=lowest
-OutputDir=.\output
+OutputDir=.\.output
 OutputBaseFilename=NoxyToolsSetup
 SetupIconFile=.\diskette.ico
 Compression=lzma
@@ -40,7 +40,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; GitHub Actions CI: publish\NoxyTools\ / 로컬 빌드: NoxyTools.Wpf\bin\Release\net8.0-windows\win-x64\publish\
 #ifdef CI_BUILD
 Source: "..\publish\NoxyTools\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\publish\NoxyTools\noxypedia.dat"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\publish\NoxyTools\Resources\noxypedia.dat"; DestDir: "{app}\Resources"; Flags: ignoreversion
 #else
 Source: "..\NoxyTools\NoxyTools.Wpf\bin\Release\net8.0-windows\win-x64\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\NoxyTools\NoxyTools.Wpf\bin\Release\net8.0-windows\win-x64\publish\Resources\noxypedia.dat"; DestDir: "{app}\Resources"; Flags: ignoreversion skipifsourcedoesntexist
