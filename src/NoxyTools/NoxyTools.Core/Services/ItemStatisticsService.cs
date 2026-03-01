@@ -1,3 +1,4 @@
+using NoxyTools.Core.Model;
 using ReplayParser;
 using SaveParser;
 using System.Collections.Generic;

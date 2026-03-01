@@ -1,9 +1,11 @@
 using Noxypedia.Model;
+using NoxyTools.Core.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using ErrorEventArgs = NoxyTools.Core.Model.ErrorEventArgs;
 
 namespace NoxyTools.Core.Services
 {

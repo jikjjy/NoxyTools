@@ -1,4 +1,5 @@
 using Microsoft.Win32;
+using NoxyTools.Core.Model;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

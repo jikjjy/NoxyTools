@@ -132,7 +132,7 @@ public partial class NoxypediaSearchViewModel : ViewModelBase
 
     private static void updateCollectionImage(
         System.Collections.ObjectModel.ObservableCollection<ButtonItemVM> collection, string url,
-        NoxyTools.Core.Model.CacheService cache)
+        CacheService cache)
     {
         foreach (var vm in collection)
         {
