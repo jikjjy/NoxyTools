@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "NoxyTools"
-#define MyAppVersion "0.1.0"
+#define MyAppVersion "0.2.0"
 #define MyAppPublisher "URUM"
 #define MyAppURL "https://cafe.naver.com/noxy"
 #define MyAppExeName "NoxyToolsWpf.exe"
@@ -43,7 +43,7 @@ Source: "..\publish\NoxyTools\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignorev
 Source: "..\publish\NoxyTools\noxypedia.dat"; DestDir: "{app}"; Flags: ignoreversion
 #else
 Source: "..\NoxyTools\NoxyTools.Wpf\bin\Release\net8.0-windows\win-x64\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\NoxyTools\NoxyTools.Wpf\bin\Release\net8.0-windows\win-x64\publish\noxypedia.dat"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "..\NoxyTools\NoxyTools.Wpf\bin\Release\net8.0-windows\win-x64\publish\Resources\noxypedia.dat"; DestDir: "{app}\Resources"; Flags: ignoreversion skipifsourcedoesntexist
 #endif
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
