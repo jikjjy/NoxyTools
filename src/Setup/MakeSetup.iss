@@ -22,9 +22,9 @@ DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=lowest
-OutputDir=D:\Source\NoxyTools\Setup
+OutputDir=.\output
 OutputBaseFilename=NoxyToolsSetup
-SetupIconFile=D:\Source\NoxyTools\Setup\diskette.ico
+SetupIconFile=.\diskette.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -42,8 +42,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "..\publish\NoxyTools\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\publish\NoxyTools\noxypedia.dat"; DestDir: "{app}"; Flags: ignoreversion
 #else
-Source: "D:\Source\_작업\NoxyTools\NoxyTools.Wpf\bin\Release\net8.0-windows\win-x64\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Source\_작업\NoxyTools\NoxyTools.Wpf\bin\Release\net8.0-windows\win-x64\publish\noxypedia.dat"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "..\NoxyTools\NoxyTools.Wpf\bin\Release\net8.0-windows\win-x64\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\NoxyTools\NoxyTools.Wpf\bin\Release\net8.0-windows\win-x64\publish\noxypedia.dat"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 #endif
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

@@ -39,7 +39,7 @@ jobs:
         run: |
           $ver     = "${{ steps.version.outputs.VER }}"
           $verFull = "$ver.0"   # 4-part 버전 (0.2.0 → 0.2.0.0)
-          $csproj  = "NoxyTools.Wpf\NoxyTools.Wpf.csproj"
+          $csproj  = "src/NoxyTools/NoxyTools.Wpf/NoxyTools.Wpf.csproj"
 
           [xml]$xml = Get-Content $csproj
           $pg = $xml.Project.PropertyGroup | Where-Object { $_.AssemblyVersion } | Select-Object -First 1
@@ -51,18 +51,18 @@ jobs:
 
       # ── 5. NuGet 복원 ─────────────────────────────────────────────
       - name: Restore NuGet packages
-        run: dotnet restore NoxyTools.sln
+        run: dotnet restore src/NoxyTools/NoxyTools.sln
 
       # ── 6. Release 빌드 + Self-contained 발행 ────────────────────
       - name: Publish NoxyTools.Wpf
         run: >
-          dotnet publish NoxyTools.Wpf\NoxyTools.Wpf.csproj
+          dotnet publish src/NoxyTools/NoxyTools.Wpf/NoxyTools.Wpf.csproj
           -c Release
           -r win-x64
           --self-contained true
           -p:PublishSingleFile=true
           -p:IncludeNativeLibrariesForSelfExtract=true
-          -o publish\NoxyTools
+          -o src/publish/NoxyTools
 
       # ── 7. Inno Setup 설치 ───────────────────────────────────────
       - name: Install Inno Setup
@@ -75,21 +75,21 @@ jobs:
           $ver = "${{ steps.version.outputs.VER }}"
 
           # .iss에서 버전·출력 경로만 패치 (소스 경로는 #ifdef CI_BUILD 조건으로 처리)
-          $issRaw = Get-Content "Setup\MakeSetup.iss" -Raw
+          $issRaw = Get-Content "src/Setup/MakeSetup.iss" -Raw
           $issPatched = $issRaw `
             -replace '#define MyAppVersion "[^"]*"', "#define MyAppVersion `"$ver`"" `
-            -replace 'OutputDir=[^\r\n]*',           'OutputDir=..\Setup\output'
+            -replace 'OutputDir=[^\r\n]*',           'OutputDir=.\output'
 
-          Set-Content "Setup\MakeSetup.CI.iss" $issPatched
-          New-Item -ItemType Directory -Force "Setup\output" | Out-Null
+          Set-Content "src/Setup/MakeSetup.CI.iss" $issPatched
+          New-Item -ItemType Directory -Force "src/Setup/output" | Out-Null
 
           # /DCI_BUILD → .iss 내부 #ifdef CI_BUILD 조건 활성화
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DCI_BUILD "Setup\MakeSetup.CI.iss"
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DCI_BUILD "src/Setup/MakeSetup.CI.iss"
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup 컴파일 실패" }
 
       # ── 9. 아티팩트 경로 확인 ────────────────────────────────────
       - name: Verify installer
-        run: dir Setup\output
+        run: dir src/Setup/output
 
       # ── 10. GitHub Release 생성 + Asset 업로드 ───────────────────
       - name: Create GitHub Release
@@ -101,6 +101,6 @@ jobs:
           draft:      false
           prerelease: ${{ contains(github.ref_name, '-') }}   # v0.2.0-beta → prerelease
           files: |
-            Setup/output/NoxyToolsSetup.exe
+            src/Setup/output/NoxyToolsSetup.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
