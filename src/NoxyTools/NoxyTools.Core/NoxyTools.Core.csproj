@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>NoxyTools.Core</RootNamespace>
+    <AssemblyName>NoxyTools.Core</AssemblyName>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!-- BinaryFormatter: ItemSimulatorService에서 사용 중 (별도 마이그 계획 필요) -->
+    <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
+    <NoWarn>CA1416;SYSLIB0014</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="8.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Noxypedia\Noxypedia.csproj" />
+    <ProjectReference Include="..\SaveParser\SaveParser.csproj" />
+    <ProjectReference Include="..\ReplayParser\ReplayParser.csproj" />
+    <ProjectReference Include="..\Settings\Settings.csproj" />
+  </ItemGroup>
+
+</Project>

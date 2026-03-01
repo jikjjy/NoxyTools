@@ -1,0 +1,31 @@
+## Visual Studio files
+.vs/
+.vscode/settings.json
+*.user
+*.suo
+
+## Build outputs
+bin/
+obj/
+publish/
+
+## NuGet packages
+packages/
+*.nupkg
+
+## Log files
+*.log
+
+## Temp / CI intermediate
+Setup/output/
+Setup/MakeSetup.CI.iss
+
+## OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+## Secrets (GitHub token 등은 절대 커밋 금지)
+*.token
+*.secret
+appsettings.local.json

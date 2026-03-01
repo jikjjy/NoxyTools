@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <RootNamespace>Noxypedia</RootNamespace>
+    <AssemblyName>Noxypedia</AssemblyName>
+    <!-- 레거시 .dat 파일 변환을 위한 BinaryFormatter 한시적 허용 -->
+    <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
+    <NoWarn>$(NoWarn);SYSLIB0011</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LZMA-SDK" Version="19.0.0" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.10" />
+  </ItemGroup>
+
+</Project>

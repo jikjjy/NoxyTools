@@ -1,0 +1,686 @@
+<UserControl x:Class="NoxyTools.Wpf.Views.NoxypediaSearchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:NoxyTools.Wpf.ViewModels"
+             xmlns:ctrl="clr-namespace:NoxyTools.Wpf.Controls"
+             xmlns:conv="clr-namespace:NoxyTools.Wpf.Converters"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:NoxypediaSearchViewModel, IsDesignTimeCreatable=False}">
+
+    <UserControl.Resources>
+        <conv:NullToVisibilityConverter  x:Key="NullToVisibilityConverter"/>
+        <conv:BoolToVisibilityConverter  x:Key="BoolToVisibilityConverter"/>
+
+        <!-- 3D 텍스트 효과 스타일 -->
+        <Style x:Key="Label3dStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}"/>
+            <Setter Property="FontSize"   Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect ShadowDepth="1.5" Direction="315"
+                                      BlurRadius="0" Opacity="0.6"
+                                      Color="Black"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- 선택됨 강조 버튼 스타일 -->
+        <Style x:Key="NavItemButtonStyle" TargetType="Button" BasedOn="{StaticResource SpeedButtonStyle}">
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="TextBlock.TextAlignment"    Value="Left"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="MinHeight" Value="26"/>
+        </Style>
+        <Style x:Key="NavItemButtonSelectedStyle" TargetType="Button" BasedOn="{StaticResource NavItemButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource AccentPressedBrush}"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="{StaticResource SurfaceBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 상태 메시지 -->
+        <Border Grid.Row="0"
+                Background="{StaticResource PanelBackgroundBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="8,4">
+            <TextBlock Text="{Binding StatusMessage}"
+                       Foreground="{StaticResource SecondaryTextBrush}"
+                       FontSize="11"/>
+        </Border>
+
+        <!-- 주 컨텐츠 -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300" MinWidth="200" MaxWidth="500"/>
+                <ColumnDefinition Width="4"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 좌측: 아이템 검색 -->
+            <ctrl:SearchItemControl Grid.Column="0"
+                                    DataContext="{Binding SearchItemVM}"/>
+
+            <GridSplitter Grid.Column="1"
+                          Width="4"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          Background="{StaticResource BorderBrush}"
+                          Cursor="SizeWE"
+                          ShowsPreview="True"/>
+
+            <!-- 우측: 탭 상세 정보 + 하단 네비 -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <!-- 테크 네비 버튼 (상황에 따라 표시) -->
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- ── TabControl ──────────────────────────────────── -->
+                <TabControl Grid.Row="0"
+                            SelectedIndex="{Binding SelectedTabIndex}"
+                            Background="{StaticResource PanelBackgroundBrush}"
+                            BorderBrush="{StaticResource BorderBrush}">
+
+                    <!-- ══ 탭 1: 기본 정보 ══════════════════════════ -->
+                    <TabItem Header="기본정보 [F1]">
+                        <Grid Background="{StaticResource PanelBackgroundBrush}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- 좌: 이미지 + 등급/부위/이름 -->
+                            <Border Grid.Column="0"
+                                    Width="200"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="0,0,1,0"
+                                    Background="{StaticResource SurfaceBackgroundBrush}"
+                                    Padding="12">
+                                <StackPanel>
+                                    <!-- 아이템 이미지 -->
+                                    <Border Width="80" Height="80"
+                                            Margin="0,0,0,12"
+                                            HorizontalAlignment="Center"
+                                            Background="{StaticResource ControlBackgroundBrush}"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="1">
+                                        <Image Source="{Binding SelectedItemImage}"
+                                               Stretch="Uniform"
+                                               RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                    </Border>
+
+                                    <!-- 부위 (3D) -->
+                                    <TextBlock Text="{Binding SelectedItemPart}"
+                                               Style="{StaticResource Label3dStyle}"
+                                               Foreground="{StaticResource SecondaryTextBrush}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,4"/>
+
+                                    <!-- 등급 (3D + 등급 색상) -->
+                                    <TextBlock Text="{Binding SelectedItemGrade}"
+                                               Style="{StaticResource Label3dStyle}"
+                                               Foreground="{Binding GradeColor}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,4"/>
+
+                                    <!-- 이름 (3D) -->
+                                    <TextBlock Text="{Binding SelectedItemName}"
+                                               Style="{StaticResource Label3dStyle}"
+                                               TextWrapping="Wrap"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,8"/>
+
+                                    <!-- 이름 복사 버튼 -->
+                                    <Button Content="이름 복사"
+                                            Command="{Binding CopyItemNameCommand}"
+                                            Style="{StaticResource SpeedButtonStyle}"
+                                            Width="Auto" Height="Auto"
+                                            Padding="12,5"
+                                            HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 우: 상세 RichTextBox -->
+                            <RichTextBox Grid.Column="1"
+                                         x:Name="InfoRichTextBox"
+                                         IsReadOnly="True"
+                                         Background="#1E1E1E"
+                                         Foreground="#E0E0E0"
+                                         FontFamily="맑은 고딕, Malgun Gothic"
+                                         FontSize="12"
+                                         Padding="8"
+                                         BorderThickness="0"
+                                         VerticalScrollBarVisibility="Auto">
+                                <FlowDocument/>
+                            </RichTextBox>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- ══ 탭 2: 획득 정보 ══════════════════════════ -->
+                    <TabItem Header="획득정보 [F2]">
+                        <Grid Background="{StaticResource PanelBackgroundBrush}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- 상단: 레시피 + 재료 버튼 -->
+                            <Border Grid.Row="0"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="0,0,0,1"
+                                    Padding="8,6">
+                                <StackPanel>
+                                    <!-- 레시피 텍스트 + 복사 -->
+                                    <DockPanel Margin="0,0,0,6">
+                                        <Button DockPanel.Dock="Right"
+                                                Content="복사"
+                                                Width="44"
+                                                Margin="4,0,0,0"
+                                                Command="{Binding CopyCraftRecipeCommand}"
+                                                Style="{StaticResource SpeedButtonStyle}"/>
+                                        <TextBox Text="{Binding CraftRecipeText, Mode=OneWay}"
+                                                 IsReadOnly="True"
+                                                 Background="{StaticResource InputBackgroundBrush}"
+                                                 Foreground="{StaticResource PrimaryTextBrush}"
+                                                 BorderBrush="{StaticResource BorderBrush}"
+                                                 FontFamily="맑은 고딕, Malgun Gothic"
+                                                 FontSize="11"
+                                                 Padding="4,3"/>
+                                    </DockPanel>
+
+                                    <!-- 재료 버튼 -->
+                                    <TextBlock Text="재료" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
+                                    <ItemsControl ItemsSource="{Binding CraftMaterials}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Margin="0,0,4,4"
+                                                        Padding="8,5"
+                                                        MinHeight="42"
+                                                        Width="Auto" Height="Auto"
+                                                        Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        Command="{Binding DataContext.SelectMaterialButtonCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Button.ContextMenu>
+                                                        <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                                            <MenuItem Header="아이템 찾기"
+                                                                      Command="{Binding SelectMaterialButtonCommand}"
+                                                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                        </ContextMenu>
+                                                    </Button.ContextMenu>
+                                                    <Button.Style>
+                                                        <Style TargetType="Button" BasedOn="{StaticResource SpeedButtonStyle}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                    <Setter Property="Background" Value="{StaticResource AccentPressedBrush}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Button.Style>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Image Source="{Binding Image}"
+                                                               Width="36" Height="36"
+                                                               Margin="0,0,6,0"
+                                                               RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                                               Visibility="{Binding Image, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                                        <TextBlock Text="{Binding Text}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <!-- 조합 장소 버튼 -->
+                                    <Button Content="{Binding CraftLocationName}"
+                                            Command="{Binding SelectCraftLocationButtonCommand}"
+                                            IsEnabled="{Binding CraftLocationEnabled}"
+                                            Width="Auto" Height="Auto"
+                                            HorizontalAlignment="Left"
+                                            Padding="10,5"
+                                            MinHeight="28"
+                                            Margin="0,6,0,0">
+                                        <Button.ContextMenu>
+                                            <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                <MenuItem Header="아이템 찾기"
+                                                          Command="{Binding SelectCraftLocationButtonCommand}"/>
+                                            </ContextMenu>
+                                        </Button.ContextMenu>
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource SpeedButtonStyle}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding CraftLocationSelected}" Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource AccentPressedBrush}"/>
+                                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 하단: 맵 이미지 + 지역 버튼 + 드롭 크리프 -->
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="220"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- 맵 이미지 -->
+                                <Border Grid.Column="0"
+                                        Background="{StaticResource SurfaceBackgroundBrush}"
+                                        Margin="8">
+                                    <Grid>
+                                        <!-- 기본 아이콘 (맵 없을 때, 깜빡임 애니메이션) -->
+                                        <TextBlock Text="🗺"
+                                                   FontSize="48"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Opacity" Value="0.35"/>
+                                                    <Style.Triggers>
+                                                        <!-- 맵 이미지가 있으면 숨김 -->
+                                                        <DataTrigger Binding="{Binding MapImage, Converter={StaticResource NullToVisibilityConverter}}" Value="Visible">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                        <!-- 맵 이미지 없을 때 깜빡임 -->
+                                                        <DataTrigger Binding="{Binding MapImage}" Value="{x:Null}">
+                                                            <DataTrigger.EnterActions>
+                                                                <BeginStoryboard x:Name="MapBlinkStoryboard">
+                                                                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                                         From="0.35" To="0.08"
+                                                                                         Duration="0:0:0.5"/>
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </DataTrigger.EnterActions>
+                                                            <DataTrigger.ExitActions>
+                                                                <StopStoryboard BeginStoryboardName="MapBlinkStoryboard"/>
+                                                            </DataTrigger.ExitActions>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <Image Source="{Binding MapImage}"
+                                               Stretch="Uniform"
+                                               Visibility="{Binding MapImage, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- 지역 버튼 + 드롭 크리프 -->
+                                <Grid Grid.Column="1"
+                                      Visibility="{Binding DropCreepsPanelVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- 지역 버튼 -->
+                                    <StackPanel Grid.Row="0" Margin="0,8,8,4">
+                                        <TextBlock Text="지역" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
+                                        <ItemsControl ItemsSource="{Binding CraftRegions}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Margin="0,0,4,4"
+                                                            Padding="8,4"
+                                                            MinHeight="28"
+                                                            Width="Auto" Height="Auto"
+                                                            Content="{Binding Text}"
+                                                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            Command="{Binding DataContext.SelectRegionButtonCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}">
+                                                        <Button.ContextMenu>
+                                                            <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                                                <MenuItem Header="아이템 찾기"
+                                                                          Command="{Binding SelectRegionButtonCommand}"
+                                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                            </ContextMenu>
+                                                        </Button.ContextMenu>
+                                                        <Button.Style>
+                                                            <Style TargetType="Button" BasedOn="{StaticResource SpeedButtonStyle}">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                        <Setter Property="Background" Value="{StaticResource AccentPressedBrush}"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+
+                                    <!-- 드롭 크리프 RichTextBox -->
+                                    <RichTextBox Grid.Row="1"
+                                                 x:Name="DropCreepsRichTextBox"
+                                                 IsReadOnly="True"
+                                                 Background="#1E1E1E"
+                                                 Foreground="#E0E0E0"
+                                                 FontFamily="맑은 고딕, Malgun Gothic"
+                                                 FontSize="12"
+                                                 Padding="8"
+                                                 BorderThickness="0"
+                                                 VerticalScrollBarVisibility="Auto"
+                                                 Margin="0,0,8,8">
+                                        <FlowDocument/>
+                                    </RichTextBox>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- ══ 탭 3: 테크 ════════════════════════════════ -->
+                    <TabItem Header="테크 [F3]">
+                        <Grid Background="{StaticResource PanelBackgroundBrush}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="4"/>
+                                <ColumnDefinition Width="180"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- 좌: 시작/최종 버튼 + 테크 RichTextBox -->
+                            <Grid Grid.Column="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- 시작 아이템 -->
+                                <Border Grid.Row="0"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="0,0,0,1"
+                                        Padding="8,6">
+                                    <StackPanel>
+                                        <TextBlock Text="시작 아이템" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
+                                        <ItemsControl ItemsSource="{Binding TechBeginItems}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Margin="0,0,4,4" Padding="6,4" MinHeight="32"
+                                                            Width="Auto" Height="Auto"
+                                                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            Command="{Binding DataContext.SelectTechBeginItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}">
+                                                        <Button.ContextMenu>
+                                                            <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                                                <MenuItem Header="아이템 찾기"
+                                                                          Command="{Binding SelectTechBeginItemCommand}"
+                                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                            </ContextMenu>
+                                                        </Button.ContextMenu>
+                                                        <Button.Style>
+                                                            <Style TargetType="Button" BasedOn="{StaticResource SpeedButtonStyle}">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                        <Setter Property="Background" Value="{StaticResource AccentPressedBrush}"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Image Source="{Binding Image}" Width="24" Height="24" Margin="0,0,6,0"
+                                                                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                                                   Visibility="{Binding Image, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                                            <TextBlock Text="{Binding Text}" VerticalAlignment="Center"/>
+                                                        </StackPanel>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 최종 아이템 -->
+                                <Border Grid.Row="1"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="0,0,0,1"
+                                        Padding="8,6">
+                                    <StackPanel>
+                                        <TextBlock Text="최종 아이템" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
+                                        <ItemsControl ItemsSource="{Binding TechFinalItems}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Margin="0,0,4,4" Padding="6,4" MinHeight="32"
+                                                            Width="Auto" Height="Auto"
+                                                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            Command="{Binding DataContext.SelectTechFinalItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}">
+                                                        <Button.ContextMenu>
+                                                            <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                                                <MenuItem Header="아이템 찾기"
+                                                                          Command="{Binding SelectTechFinalItemCommand}"
+                                                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                            </ContextMenu>
+                                                        </Button.ContextMenu>
+                                                        <Button.Style>
+                                                            <Style TargetType="Button" BasedOn="{StaticResource SpeedButtonStyle}">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                        <Setter Property="Background" Value="{StaticResource AccentPressedBrush}"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Image Source="{Binding Image}" Width="24" Height="24" Margin="0,0,6,0"
+                                                                   RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                                                   Visibility="{Binding Image, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                                            <TextBlock Text="{Binding Text}" VerticalAlignment="Center"/>
+                                                        </StackPanel>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 테크 RichTextBox -->
+                                <RichTextBox Grid.Row="2"
+                                             x:Name="TechRichTextBox"
+                                             IsReadOnly="True"
+                                             Background="#1E1E1E"
+                                             Foreground="#E0E0E0"
+                                             FontFamily="맑은 고딕, Malgun Gothic"
+                                             FontSize="12"
+                                             Padding="8"
+                                             BorderThickness="0"
+                                             VerticalScrollBarVisibility="Auto">
+                                    <FlowDocument/>
+                                </RichTextBox>
+
+                                <!-- 하단 옵션 + 복사 -->
+                                <Border Grid.Row="3"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="0,1,0,0"
+                                        Padding="8,6">
+                                    <DockPanel>
+                                        <Button DockPanel.Dock="Right"
+                                                Content="복사"
+                                                Width="50"
+                                                Command="{Binding CopyTechCommand}"
+                                                Style="{StaticResource SpeedButtonStyle}"/>
+                                        <CheckBox Content="상세 표시"
+                                                  IsChecked="{Binding TechDetailOption}"
+                                                  VerticalAlignment="Center"/>
+                                    </DockPanel>
+                                </Border>
+                            </Grid>
+
+                            <GridSplitter Grid.Column="1" Width="4"
+                                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                          Background="{StaticResource BorderBrush}" Cursor="SizeWE"/>
+
+                            <!-- 우: 등급 색상 범례 -->
+                            <RichTextBox Grid.Column="2"
+                                         x:Name="TechGradeRichTextBox"
+                                         IsReadOnly="True"
+                                         Background="#1E1E1E"
+                                         Foreground="#E0E0E0"
+                                         FontFamily="맑은 고딕, Malgun Gothic"
+                                         FontSize="12"
+                                         Padding="8"
+                                         BorderThickness="0,0,0,0"
+                                         BorderBrush="{StaticResource BorderBrush}"
+                                         VerticalScrollBarVisibility="Auto">
+                                <FlowDocument/>
+                            </RichTextBox>
+                        </Grid>
+                    </TabItem>
+
+                </TabControl>
+
+                <!-- 테크 네비게이션 버튼 (이전/다음 아이템) -->
+                <Border Grid.Row="1"
+                        Background="{StaticResource MenuBarBackgroundBrush}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="0,1,0,0"
+                        Padding="8,4">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding NavPreviousVisible}" Value="False"/>
+                                        <Condition Binding="{Binding NavNextVisible}"     Value="False"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+
+                        <!-- ◀ 이전 아이템 버튼 + 다중 선택 팝업 -->
+                        <Grid>
+                            <Button x:Name="BtnNavPrev"
+                                    Content="◀ 이전 아이템"
+                                    Command="{Binding NavigatePreviousCommand}"
+                                    Visibility="{Binding NavPreviousVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    Style="{StaticResource SpeedButtonStyle}"
+                                    Width="Auto" Height="Auto" MinHeight="28"
+                                    Padding="12,4" Margin="0,0,8,0"/>
+                            <Popup x:Name="NavPrevPopup"
+                                   IsOpen="{Binding IsNavPreviousPopupOpen, Mode=TwoWay}"
+                                   PlacementTarget="{Binding ElementName=BtnNavPrev}"
+                                   Placement="Top"
+                                   StaysOpen="False"
+                                   AllowsTransparency="True">
+                                <Border Background="{StaticResource ControlBackgroundBrush}"
+                                        BorderBrush="{StaticResource AccentBrush}"
+                                        BorderThickness="1"
+                                        MinWidth="200"
+                                        Padding="2">
+                                    <ItemsControl ItemsSource="{Binding NavPreviousChoices}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Width="Auto" Height="Auto"
+                                                        HorizontalAlignment="Stretch"
+                                                        HorizontalContentAlignment="Left"
+                                                        Padding="8,6"
+                                                        Margin="0,1"
+                                                        Style="{StaticResource SpeedButtonStyle}"
+                                                        Command="{Binding DataContext.NavigateChoiceCommand,
+                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Border Width="28" Height="28" Margin="0,0,8,0"
+                                                                Background="{StaticResource SurfaceBackgroundBrush}"
+                                                                Visibility="{Binding Image, Converter={StaticResource NullToVisibilityConverter}}">
+                                                            <Image Source="{Binding Image}"
+                                                                   Stretch="Uniform"
+                                                                   RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                                        </Border>
+                                                        <TextBlock Text="{Binding Text}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Border>
+                            </Popup>
+                        </Grid>
+
+                        <!-- 다음 아이템 ▶ 버튼 + 다중 선택 팝업 -->
+                        <Grid>
+                            <Button x:Name="BtnNavNext"
+                                    Content="다음 아이템 ▶"
+                                    Command="{Binding NavigateNextCommand}"
+                                    Visibility="{Binding NavNextVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    Style="{StaticResource SpeedButtonStyle}"
+                                    Width="Auto" Height="Auto" MinHeight="28"
+                                    Padding="12,4"/>
+                            <Popup x:Name="NavNextPopup"
+                                   IsOpen="{Binding IsNavNextPopupOpen, Mode=TwoWay}"
+                                   PlacementTarget="{Binding ElementName=BtnNavNext}"
+                                   Placement="Top"
+                                   StaysOpen="False"
+                                   AllowsTransparency="True">
+                                <Border Background="{StaticResource ControlBackgroundBrush}"
+                                        BorderBrush="{StaticResource AccentBrush}"
+                                        BorderThickness="1"
+                                        MinWidth="200"
+                                        Padding="2">
+                                    <ItemsControl ItemsSource="{Binding NavNextChoices}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Width="Auto" Height="Auto"
+                                                        HorizontalAlignment="Stretch"
+                                                        HorizontalContentAlignment="Left"
+                                                        Padding="8,6"
+                                                        Margin="0,1"
+                                                        Style="{StaticResource SpeedButtonStyle}"
+                                                        Command="{Binding DataContext.NavigateChoiceCommand,
+                                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Border Width="28" Height="28" Margin="0,0,8,0"
+                                                                Background="{StaticResource SurfaceBackgroundBrush}"
+                                                                Visibility="{Binding Image, Converter={StaticResource NullToVisibilityConverter}}">
+                                                            <Image Source="{Binding Image}"
+                                                                   Stretch="Uniform"
+                                                                   RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                                        </Border>
+                                                        <TextBlock Text="{Binding Text}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Border>
+                            </Popup>
+                        </Grid>
+
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

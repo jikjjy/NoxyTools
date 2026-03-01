@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31229.75
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaveParser", "SaveParser\SaveParser.csproj", "{172FFEC8-943B-4265-82BB-99653C945120}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Settings", "Settings\Settings.csproj", "{E4CEF830-62AD-47ED-815F-A331770EFADC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReplayParser", "ReplayParser\ReplayParser.csproj", "{FEC91126-7CFC-4C21-B174-0BB6C693032F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Noxypedia", "Noxypedia\Noxypedia.csproj", "{F51994A9-FCF9-4299-B0F8-62ECE94A0C80}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoxypediaEditor", "NoxypediaEditor\NoxypediaEditor.csproj", "{6441BCF9-91CA-49F9-B77E-5C4B5E7F5A73}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoxyTools.Wpf", "NoxyTools.Wpf\NoxyTools.Wpf.csproj", "{2A5C3F89-E1D4-4B72-9C8A-F3D607E2B145}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoxyTools.Core", "NoxyTools.Core\NoxyTools.Core.csproj", "{8F4E1A32-7C5D-4E9B-A2F6-E8D1C4B09372}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{172FFEC8-943B-4265-82BB-99653C945120}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{172FFEC8-943B-4265-82BB-99653C945120}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{172FFEC8-943B-4265-82BB-99653C945120}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{172FFEC8-943B-4265-82BB-99653C945120}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4CEF830-62AD-47ED-815F-A331770EFADC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4CEF830-62AD-47ED-815F-A331770EFADC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4CEF830-62AD-47ED-815F-A331770EFADC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4CEF830-62AD-47ED-815F-A331770EFADC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEC91126-7CFC-4C21-B174-0BB6C693032F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEC91126-7CFC-4C21-B174-0BB6C693032F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEC91126-7CFC-4C21-B174-0BB6C693032F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEC91126-7CFC-4C21-B174-0BB6C693032F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F51994A9-FCF9-4299-B0F8-62ECE94A0C80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F51994A9-FCF9-4299-B0F8-62ECE94A0C80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F51994A9-FCF9-4299-B0F8-62ECE94A0C80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F51994A9-FCF9-4299-B0F8-62ECE94A0C80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6441BCF9-91CA-49F9-B77E-5C4B5E7F5A73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6441BCF9-91CA-49F9-B77E-5C4B5E7F5A73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6441BCF9-91CA-49F9-B77E-5C4B5E7F5A73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6441BCF9-91CA-49F9-B77E-5C4B5E7F5A73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A5C3F89-E1D4-4B72-9C8A-F3D607E2B145}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A5C3F89-E1D4-4B72-9C8A-F3D607E2B145}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A5C3F89-E1D4-4B72-9C8A-F3D607E2B145}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A5C3F89-E1D4-4B72-9C8A-F3D607E2B145}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F4E1A32-7C5D-4E9B-A2F6-E8D1C4B09372}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F4E1A32-7C5D-4E9B-A2F6-E8D1C4B09372}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F4E1A32-7C5D-4E9B-A2F6-E8D1C4B09372}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F4E1A32-7C5D-4E9B-A2F6-E8D1C4B09372}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {68665D15-C086-49C1-AE7F-EEB93877CEE4}
+	EndGlobalSection
+EndGlobal

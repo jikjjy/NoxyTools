@@ -1,0 +1,106 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'   # v0.2.0, v1.0.0 등 태그 푸시 시 트리거
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+    permissions:
+      contents: write   # Release 생성 및 Asset 업로드 권한
+
+    steps:
+      # ── 1. 소스 체크아웃 ──────────────────────────────────────────
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # ── 2. .NET 8 설치 ────────────────────────────────────────────
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # ── 3. 태그에서 버전 추출 (v0.2.0 → 0.2.0) ───────────────────
+      - name: Extract version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"          # 예: v0.2.0
+          $ver = $tag.TrimStart('v')               # 예: 0.2.0
+          echo "TAG=$tag"   >> $env:GITHUB_OUTPUT
+          echo "VER=$ver"   >> $env:GITHUB_OUTPUT
+          Write-Host "Tag: $tag  /  Version: $ver"
+
+      # ── 4. csproj 버전 자동 패치 ─────────────────────────────────
+      - name: Patch version in csproj
+        shell: pwsh
+        run: |
+          $ver     = "${{ steps.version.outputs.VER }}"
+          $verFull = "$ver.0"   # 4-part 버전 (0.2.0 → 0.2.0.0)
+          $csproj  = "NoxyTools.Wpf\NoxyTools.Wpf.csproj"
+
+          [xml]$xml = Get-Content $csproj
+          $pg = $xml.Project.PropertyGroup | Where-Object { $_.AssemblyVersion } | Select-Object -First 1
+          $pg.Version         = $ver
+          $pg.AssemblyVersion = $verFull
+          $pg.FileVersion     = $verFull
+          $xml.Save((Resolve-Path $csproj))
+          Write-Host "Patched $csproj to version $ver"
+
+      # ── 5. NuGet 복원 ─────────────────────────────────────────────
+      - name: Restore NuGet packages
+        run: dotnet restore NoxyTools.sln
+
+      # ── 6. Release 빌드 + Self-contained 발행 ────────────────────
+      - name: Publish NoxyTools.Wpf
+        run: >
+          dotnet publish NoxyTools.Wpf\NoxyTools.Wpf.csproj
+          -c Release
+          -r win-x64
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -o publish\NoxyTools
+
+      # ── 7. Inno Setup 설치 ───────────────────────────────────────
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      # ── 8. MakeSetup.iss 빌드 시 경로/버전 처리 후 컴파일 ──────────
+      - name: Compile Inno Setup script
+        shell: pwsh
+        run: |
+          $ver = "${{ steps.version.outputs.VER }}"
+
+          # .iss에서 버전·출력 경로만 패치 (소스 경로는 #ifdef CI_BUILD 조건으로 처리)
+          $issRaw = Get-Content "Setup\MakeSetup.iss" -Raw
+          $issPatched = $issRaw `
+            -replace '#define MyAppVersion "[^"]*"', "#define MyAppVersion `"$ver`"" `
+            -replace 'OutputDir=[^\r\n]*',           'OutputDir=..\Setup\output'
+
+          Set-Content "Setup\MakeSetup.CI.iss" $issPatched
+          New-Item -ItemType Directory -Force "Setup\output" | Out-Null
+
+          # /DCI_BUILD → .iss 내부 #ifdef CI_BUILD 조건 활성화
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DCI_BUILD "Setup\MakeSetup.CI.iss"
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup 컴파일 실패" }
+
+      # ── 9. 아티팩트 경로 확인 ────────────────────────────────────
+      - name: Verify installer
+        run: dir Setup\output
+
+      # ── 10. GitHub Release 생성 + Asset 업로드 ───────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name:   ${{ github.ref_name }}
+          name:       "NoxyTools ${{ steps.version.outputs.TAG }}"
+          body_path:  CHANGELOG.md
+          draft:      false
+          prerelease: ${{ contains(github.ref_name, '-') }}   # v0.2.0-beta → prerelease
+          files: |
+            Setup/output/NoxyToolsSetup.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

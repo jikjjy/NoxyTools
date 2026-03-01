@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Version>0.1.0</Version>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+    <RootNamespace>NoxyTools.Wpf</RootNamespace>
+    <AssemblyName>NoxyToolsWpf</AssemblyName>
+    <ApplicationIcon>free-icon-video-game-3571528.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NoxyTools.Core\NoxyTools.Core.csproj" />
+    <ProjectReference Include="..\Noxypedia\Noxypedia.csproj" />
+    <ProjectReference Include="..\SaveParser\SaveParser.csproj" />
+    <ProjectReference Include="..\ReplayParser\ReplayParser.csproj" />
+    <ProjectReference Include="..\Settings\Settings.csproj" />
+  </ItemGroup>
+
+  <!-- 아이콘/이미지 리소스 -->
+  <ItemGroup>
+    <Resource Include="Resources\Images\**\*.png" />
+    <Resource Include="free-icon-video-game-3571528.ico" />
+  </ItemGroup>
+
+  <!-- Noxypedia 데이터 파일 (NoxypediaEditor에서 내보내기 후 이 위치에 복사) -->
+  <ItemGroup>
+    <Content Include="Resources\noxypedia.dat" Condition="Exists('Resources\noxypedia.dat')">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>
