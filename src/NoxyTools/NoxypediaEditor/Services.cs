@@ -1,6 +1,5 @@
 ﻿using Noxypedia;
 using NoxypediaEditor.Model;
-using System;
 
 namespace NoxypediaEditor
 {

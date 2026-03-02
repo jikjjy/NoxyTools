@@ -1,14 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using NoxyTools.Core.Model;
 using NoxyTools.Core.Services;
 using NoxyTools.Wpf.Services;
 using NoxyTools.Wpf.ViewModels.Base;
 using NoxyTools.Wpf.Views;
-using System;
 using System.IO;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -19,10 +16,10 @@ public partial class MainViewModel : ViewModelBase
     private readonly INavigationService _navigation;
     private readonly CacheService _cache;
     private readonly ConfigService _config;
-    private readonly MakeValidReportViewModel  _makeValidReportVm;
+    private readonly MakeValidReportViewModel _makeValidReportVm;
     private readonly NoxypediaSearchViewModel _noxypediaSearchVm;
-    private readonly ItemSimulatorViewModel    _itemSimulatorVm;
-    private readonly UpdateViewModel           _updateVm;
+    private readonly ItemSimulatorViewModel _itemSimulatorVm;
+    private readonly UpdateViewModel _updateVm;
 
     private DispatcherTimer? _statusTimer;
     private DispatcherTimer? _loadingTimer;
@@ -57,18 +54,18 @@ public partial class MainViewModel : ViewModelBase
         INavigationService navigation,
         CacheService cache,
         ConfigService config,
-        MakeValidReportViewModel  makeValidReportVm,
+        MakeValidReportViewModel makeValidReportVm,
         NoxypediaSearchViewModel noxypediaSearchVm,
-        ItemSimulatorViewModel    itemSimulatorVm,
-        UpdateViewModel           updateVm)
+        ItemSimulatorViewModel itemSimulatorVm,
+        UpdateViewModel updateVm)
     {
         _navigation = navigation;
         _cache = cache;
         _config = config;
         _makeValidReportVm = makeValidReportVm;
         _noxypediaSearchVm = noxypediaSearchVm;
-        _itemSimulatorVm   = itemSimulatorVm;
-        _updateVm          = updateVm;
+        _itemSimulatorVm = itemSimulatorVm;
+        _updateVm = updateVm;
 
         var ver = Assembly.GetEntryAssembly()?.GetName().Version;
         AppVersion = ver is not null ? $"v{ver.Major}.{ver.Minor}.{ver.Build}" : "v?.?.?";
@@ -183,10 +180,10 @@ public partial class MainViewModel : ViewModelBase
     {
         var dlg = new Microsoft.Win32.SaveFileDialog
         {
-            Title      = "설정 백업",
-            Filter     = "NoxyTools 설정 파일 (*.noxconfig)|*.noxconfig|모든 파일 (*.*)|*.*",
+            Title = "설정 백업",
+            Filter = "NoxyTools 설정 파일 (*.noxconfig)|*.noxconfig|모든 파일 (*.*)|*.*",
             DefaultExt = ".noxconfig",
-            FileName   = $"NoxyTools_Settings_{DateTime.Now:yyyyMMdd_HHmmss}"
+            FileName = $"NoxyTools_Settings_{DateTime.Now:yyyyMMdd_HHmmss}"
         };
         if (dlg.ShowDialog() != true) return;
         try
@@ -205,8 +202,8 @@ public partial class MainViewModel : ViewModelBase
     {
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
-            Title      = "설정 복구",
-            Filter     = "NoxyTools 설정 파일 (*.noxconfig)|*.noxconfig|모든 파일 (*.*)|*.*",
+            Title = "설정 복구",
+            Filter = "NoxyTools 설정 파일 (*.noxconfig)|*.noxconfig|모든 파일 (*.*)|*.*",
             DefaultExt = ".noxconfig"
         };
         if (dlg.ShowDialog() != true) return;
@@ -233,9 +230,9 @@ public partial class MainViewModel : ViewModelBase
 
     private void ReloadCurrentView()
     {
-        if (IsMakeValidReportSelected)      SelectMakeValidReport();
+        if (IsMakeValidReportSelected) SelectMakeValidReport();
         else if (IsNoxypediaSearchSelected) SelectNoxypediaSearch();
-        else if (IsItemSimulatorSelected)   SelectItemSimulator();
+        else if (IsItemSimulatorSelected) SelectItemSimulator();
     }
 
     // --- 업데이트 확인 ---

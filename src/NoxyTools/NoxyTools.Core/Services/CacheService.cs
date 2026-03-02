@@ -1,17 +1,14 @@
-using NoxyTools.Core.Model;
-using System;
-using System.IO;
-using Noxypedia;
 using Noxypedia.Model;
 using Noxypedia.Utils;
-using System.Windows.Media.Imaging;
-using System.Collections.Generic;
-using System.Text;
+using NoxyTools.Core.Model;
+using System;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
+using System.IO;
 using System.Linq;
-using System.Diagnostics;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace NoxyTools.Core.Services
 {
@@ -68,7 +65,7 @@ namespace NoxyTools.Core.Services
 
                 var (data, version) = NoxypediaDataFile.Load(datFilePath);
                 NoxypediaData = data;
-                datVersion    = version;
+                datVersion = version;
 
                 // 빠른 다음 실행을 위해 캐시 저장 (실패해도 비치명)
                 try { NoxypediaDataFile.Save(NoxypediaData, datVersion, mNoxypediaCacheFile); }
@@ -167,7 +164,7 @@ namespace NoxyTools.Core.Services
 
                     if (bitmap != null)
                     {
-                        entry.Image    = bitmap;
+                        entry.Image = bitmap;
                         entry.IsLoaded = true;
                         ImageReady?.Invoke(this, url);
                     }

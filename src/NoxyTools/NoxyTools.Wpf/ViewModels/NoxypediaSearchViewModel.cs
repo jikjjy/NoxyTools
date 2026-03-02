@@ -2,14 +2,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Noxypedia;
 using Noxypedia.Model;
-using NoxyTools.Core.Model;
 using NoxyTools.Core.Services;
 using NoxyTools.Wpf.Services;
 using NoxyTools.Wpf.ViewModels.Base;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media.Imaging;
@@ -39,47 +35,48 @@ public partial class NoxypediaSearchViewModel : ViewModelBase
     /// <summary>아이템 검색 컴포넌트 VM</summary>
     public SearchItemViewModel SearchItemVM { get; }
 
-    [ObservableProperty] private string  _statusMessage    = "DB 로딩 대기 중...";
-    [ObservableProperty] private int     _selectedTabIndex = 0;
+    [ObservableProperty] private string _statusMessage = "DB 로딩 대기 중...";
+    [ObservableProperty] private int _selectedTabIndex = 0;
 
     // 기본 정보 탭
     [ObservableProperty] private BitmapSource? _selectedItemImage;
-    [ObservableProperty] private string  _selectedItemName  = "";
-    [ObservableProperty] private string  _selectedItemGrade = "";
-    [ObservableProperty] private string  _selectedItemPart  = "";
-    [ObservableProperty] private System.Windows.Media.SolidColorBrush _gradeColor =
+    [ObservableProperty] private string _selectedItemName = "";
+    [ObservableProperty] private string _selectedItemGrade = "";
+    [ObservableProperty] private string _selectedItemPart = "";
+    [ObservableProperty]
+    private System.Windows.Media.SolidColorBrush _gradeColor =
         new(System.Windows.Media.Color.FromRgb(0xE0, 0xE0, 0xE0));
     [ObservableProperty] private FlowDocument _infoDocument = new();
 
     // 획득 정보 탭
-    [ObservableProperty] private string  _craftRecipeText   = "";
-    [ObservableProperty] private string  _craftLocationName = "";
-    [ObservableProperty] private bool    _craftLocationEnabled = false;
+    [ObservableProperty] private string _craftRecipeText = "";
+    [ObservableProperty] private string _craftLocationName = "";
+    [ObservableProperty] private bool _craftLocationEnabled = false;
     [ObservableProperty] private BitmapSource? _mapImage;
-    [ObservableProperty] private FlowDocument  _dropCreepsDocument = new();
-    [ObservableProperty] private bool    _dropCreepsPanelVisible = false;
+    [ObservableProperty] private FlowDocument _dropCreepsDocument = new();
+    [ObservableProperty] private bool _dropCreepsPanelVisible = false;
 
     // 테크 탭
-    [ObservableProperty] private FlowDocument  _techDocument     = new();
-    [ObservableProperty] private FlowDocument  _techGradeDocument = new();
-    [ObservableProperty] private bool  _techDetailOption = false;
-    [ObservableProperty] private bool  _navPreviousVisible = false;
-    [ObservableProperty] private bool  _navNextVisible     = false;
+    [ObservableProperty] private FlowDocument _techDocument = new();
+    [ObservableProperty] private FlowDocument _techGradeDocument = new();
+    [ObservableProperty] private bool _techDetailOption = false;
+    [ObservableProperty] private bool _navPreviousVisible = false;
+    [ObservableProperty] private bool _navNextVisible = false;
 
     // 획득 정보 탭 – 조합 장소 선택 상태
     [ObservableProperty] private bool _craftLocationSelected = false;
 
     // 테크 네비 다중 선택 팝업 상태
     [ObservableProperty] private bool _isNavPreviousPopupOpen = false;
-    [ObservableProperty] private bool _isNavNextPopupOpen     = false;
+    [ObservableProperty] private bool _isNavNextPopupOpen = false;
 
     // 동적 버튼 컬렉션
-    public ObservableCollection<ButtonItemVM> CraftMaterials    { get; } = new();
-    public ObservableCollection<ButtonItemVM> CraftRegions      { get; } = new();
-    public ObservableCollection<ButtonItemVM> TechBeginItems    { get; } = new();
-    public ObservableCollection<ButtonItemVM> TechFinalItems    { get; } = new();
-    public ObservableCollection<ButtonItemVM>  NavPreviousChoices { get; } = new();
-    public ObservableCollection<ButtonItemVM>  NavNextChoices     { get; } = new();
+    public ObservableCollection<ButtonItemVM> CraftMaterials { get; } = new();
+    public ObservableCollection<ButtonItemVM> CraftRegions { get; } = new();
+    public ObservableCollection<ButtonItemVM> TechBeginItems { get; } = new();
+    public ObservableCollection<ButtonItemVM> TechFinalItems { get; } = new();
+    public ObservableCollection<ButtonItemVM> NavPreviousChoices { get; } = new();
+    public ObservableCollection<ButtonItemVM> NavNextChoices { get; } = new();
 
     // ── 생성자 ───────────────────────────────────────────────────────────
 
@@ -89,9 +86,9 @@ public partial class NoxypediaSearchViewModel : ViewModelBase
         FavoriteService favoriteService,
         IClipboardService clipboard)
     {
-        _cache      = cache;
+        _cache = cache;
         _statistics = statistics;
-        _clipboard  = clipboard;
+        _clipboard = clipboard;
 
         SearchItemVM = new SearchItemViewModel(favoriteService);
         SearchItemVM.CanFilterExtension = true;
@@ -217,8 +214,8 @@ public partial class NoxypediaSearchViewModel : ViewModelBase
 
     private void OnSearchItemSelected(object? sender, ItemSet item)
     {
-        _currentItem       = item;
-        _craftContextItem  = new();
+        _currentItem = item;
+        _craftContextItem = new();
         UpdateInfoTab();
         UpdateCraftTab();
         UpdateTechTab();
@@ -237,8 +234,8 @@ public partial class NoxypediaSearchViewModel : ViewModelBase
         SelectedItemImage = GetItemImage(item);
 
         // 등급/부위/이름
-        SelectedItemName  = item.Name;
-        SelectedItemPart  = item.Part.ToString();
+        SelectedItemName = item.Name;
+        SelectedItemPart = item.Part.ToString();
         SelectedItemGrade = $"[{item.Grade.Name}]";
         var c = item.Grade.Color;
         byte a = c.A == 0 ? (byte)255 : c.A;
@@ -260,9 +257,9 @@ public partial class NoxypediaSearchViewModel : ViewModelBase
         // 조합 장소 버튼
         bool hasLocation = item.BeforeItems.Count > 0
             && !string.IsNullOrWhiteSpace(item.BeforeItems[0].CraftRecipe.Location.Name);
-        CraftLocationEnabled  = hasLocation;
+        CraftLocationEnabled = hasLocation;
         CraftLocationSelected = false;          // 선택 상태 초기화
-        CraftLocationName     = hasLocation
+        CraftLocationName = hasLocation
             ? $"조합 장소: {item.BeforeItems[0].CraftRecipe.Location.Name}"
             : "조합 장소: -";
 
@@ -277,7 +274,7 @@ public partial class NoxypediaSearchViewModel : ViewModelBase
                     mat,
                     $"[{mat.Grade.Name}]{mat.Name}",
                     imageUrl: GetItemImageUrl(mat),
-                    image:    GetItemImage(mat)));
+                    image: GetItemImage(mat)));
             }
         }
         if (CraftMaterials.Count == 0)
@@ -287,7 +284,7 @@ public partial class NoxypediaSearchViewModel : ViewModelBase
                 item,
                 $"[{item.Grade.Name}]{item.Name}",
                 imageUrl: GetItemImageUrl(item),
-                image:    GetItemImage(item)));
+                image: GetItemImage(item)));
         }
 
         // 지역/맵 초기화
@@ -390,7 +387,7 @@ public partial class NoxypediaSearchViewModel : ViewModelBase
         if (TechBeginItems.Count > 0) TechBeginItems[0].IsSelected = true;
 
         NavPreviousVisible = item.BeforeItems.Any();
-        NavNextVisible     = item.CraftDestinations.Any();
+        NavNextVisible = item.CraftDestinations.Any();
 
         // 다중 선택 팝업용 선택지 갱신
         NavPreviousChoices.Clear();
@@ -482,7 +479,7 @@ public partial class NoxypediaSearchViewModel : ViewModelBase
     private void NavigateChoice(ButtonItemVM vm)
     {
         IsNavPreviousPopupOpen = false;
-        IsNavNextPopupOpen     = false;
+        IsNavNextPopupOpen = false;
         SearchItemVM.ForceSelectItem(vm.Item);
     }
 

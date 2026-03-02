@@ -1,14 +1,10 @@
 using CommunityToolkit.Mvvm.Input;
 using Noxypedia;
 using Noxypedia.Model;
-using NoxyTools.Core.Model;
 using NoxyTools.Core.Services;
 using NoxyTools.Wpf.Services;
 using NoxyTools.Wpf.ViewModels.Base;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -21,27 +17,27 @@ namespace NoxyTools.Wpf.ViewModels;
 public partial class ItemSimulatorViewModel : ViewModelBase
 {
     // ─── 서비스 ──────────────────────────────────────────────────────────
-    private readonly CacheService        _cache;
+    private readonly CacheService _cache;
     private readonly ItemSimulatorService _itemSimulator;
-    private readonly ConfigService        _config;
-    private readonly StatisticsService    _statistics;
-    private readonly IClipboardService    _clipboard;
-    private readonly IDialogService       _dialog;
+    private readonly ConfigService _config;
+    private readonly StatisticsService _statistics;
+    private readonly IClipboardService _clipboard;
+    private readonly IDialogService _dialog;
 
     private NoxypediaSet? _noxypedia;
-    private bool          _initialized;
-    private ItemSet       _currentItem = new();
+    private bool _initialized;
+    private ItemSet _currentItem = new();
 
     // ─── 직업 이름 ↔ EClassFlags ────────────────────────────────────────
     private static readonly IReadOnlyDictionary<string, EClassFlags> ClassMap =
         new Dictionary<string, EClassFlags>
         {
-            ["기사"]     = EClassFlags.Knight,
-            ["마법사"]   = EClassFlags.Wizard,
-            ["힐러"]     = EClassFlags.Priest,
-            ["궁수"]     = EClassFlags.Archer,
+            ["기사"] = EClassFlags.Knight,
+            ["마법사"] = EClassFlags.Wizard,
+            ["힐러"] = EClassFlags.Priest,
+            ["궁수"] = EClassFlags.Archer,
             ["드루이드"] = EClassFlags.Druid,
-            ["용술사"]   = EClassFlags.Summoner,
+            ["용술사"] = EClassFlags.Summoner,
         };
 
     // ─── 공개 자식 VM ────────────────────────────────────────────────────
@@ -51,12 +47,12 @@ public partial class ItemSimulatorViewModel : ViewModelBase
     public ObservableCollection<SlotViewModel> Slots { get; } = new();
 
     /// <summary>요약 스탯 (공격/방어/HP/MP/힘/민첩/지능)</summary>
-    public StatValueVM SummaryAttack       { get; } = new();
-    public StatValueVM SummaryArmor        { get; } = new();
-    public StatValueVM SummaryHP           { get; } = new();
-    public StatValueVM SummaryMP           { get; } = new();
-    public StatValueVM SummaryStrength     { get; } = new();
-    public StatValueVM SummaryAgility      { get; } = new();
+    public StatValueVM SummaryAttack { get; } = new();
+    public StatValueVM SummaryArmor { get; } = new();
+    public StatValueVM SummaryHP { get; } = new();
+    public StatValueVM SummaryMP { get; } = new();
+    public StatValueVM SummaryStrength { get; } = new();
+    public StatValueVM SummaryAgility { get; } = new();
     public StatValueVM SummaryIntelligence { get; } = new();
 
     // ─── 직업 콤보 ───────────────────────────────────────────────────────
@@ -103,7 +99,7 @@ public partial class ItemSimulatorViewModel : ViewModelBase
     private bool _isNavNextPopupOpen;
 
     public ObservableCollection<ButtonItemVM> NavPreviousChoices { get; } = new();
-    public ObservableCollection<ButtonItemVM> NavNextChoices     { get; } = new();
+    public ObservableCollection<ButtonItemVM> NavNextChoices { get; } = new();
 
     // ─── 상태 ────────────────────────────────────────────────────────────
     [CommunityToolkit.Mvvm.ComponentModel.ObservableProperty]
@@ -112,20 +108,20 @@ public partial class ItemSimulatorViewModel : ViewModelBase
     // ─── 생성자 ──────────────────────────────────────────────────────────
 
     public ItemSimulatorViewModel(
-        CacheService        cache,
+        CacheService cache,
         ItemSimulatorService itemSimulator,
-        ConfigService        config,
-        StatisticsService    statistics,
-        FavoriteService      favoriteService,
-        IClipboardService    clipboard,
-        IDialogService       dialog)
+        ConfigService config,
+        StatisticsService statistics,
+        FavoriteService favoriteService,
+        IClipboardService clipboard,
+        IDialogService dialog)
     {
-        _cache         = cache;
+        _cache = cache;
         _itemSimulator = itemSimulator;
-        _config        = config;
-        _statistics    = statistics;
-        _clipboard     = clipboard;
-        _dialog        = dialog;
+        _config = config;
+        _statistics = statistics;
+        _clipboard = clipboard;
+        _dialog = dialog;
 
         SearchItemVM = new SearchItemViewModel(favoriteService);
         SearchItemVM.CanFilterExtension = true;
@@ -136,10 +132,10 @@ public partial class ItemSimulatorViewModel : ViewModelBase
             Slots.Add(new SlotViewModel(i));
 
         // 서비스 이벤트 구독
-        _itemSimulator.SummaryChanged   += (_, _) => UpdateSummaryUi();
-        _itemSimulator.ItemSlotChanged  += (_, _) => UpdateSlots();
-        _itemSimulator.ClassChanged     += (_, _) => { UpdateSlots(); UpdateSummaryUi(); };
-        _itemSimulator.OnError          += (_, e) => StatusMessage = e.Message;
+        _itemSimulator.SummaryChanged += (_, _) => UpdateSummaryUi();
+        _itemSimulator.ItemSlotChanged += (_, _) => UpdateSlots();
+        _itemSimulator.ClassChanged += (_, _) => { UpdateSlots(); UpdateSummaryUi(); };
+        _itemSimulator.OnError += (_, e) => StatusMessage = e.Message;
 
         // 개별 이미지 준비 이벤트 구독
         _cache.ImageReady += OnImageReady;
@@ -286,15 +282,15 @@ public partial class ItemSimulatorViewModel : ViewModelBase
         }
 
         // 등급/부위/이름
-        SelectedItemName  = item.Name;
-        SelectedItemPart  = item.Part.ToString();
+        SelectedItemName = item.Name;
+        SelectedItemPart = item.Part.ToString();
         SelectedItemGrade = $"[{item.Grade.Name}]";
 
         var c = item.Grade.Color;
         byte a = c.A == 0 ? (byte)255 : c.A;
         byte r = c.R == 0 && c.G == 0 && c.B == 0 ? (byte)241 : c.R;
-        byte g2= c.R == 0 && c.G == 0 && c.B == 0 ? (byte)241 : c.G;
-        byte b2= c.R == 0 && c.G == 0 && c.B == 0 ? (byte)241 : c.B;
+        byte g2 = c.R == 0 && c.G == 0 && c.B == 0 ? (byte)241 : c.G;
+        byte b2 = c.R == 0 && c.G == 0 && c.B == 0 ? (byte)241 : c.B;
         if (c.A == 0 && c.R == 0 && c.G == 0 && c.B == 0)
         {
             GradeColor = new SolidColorBrush(Colors.White);
@@ -309,7 +305,7 @@ public partial class ItemSimulatorViewModel : ViewModelBase
 
         // 네비게이션 버튼
         NavPreviousVisible = item.BeforeItems.Any();
-        NavNextVisible     = item.CraftDestinations.Any();
+        NavNextVisible = item.CraftDestinations.Any();
 
         // 다중 선택 팝업용 선택지 갱신
         NavPreviousChoices.Clear();
@@ -369,7 +365,7 @@ public partial class ItemSimulatorViewModel : ViewModelBase
             else
             {
                 slot.ImageUrl = null;
-                slot.Image    = null;
+                slot.Image = null;
             }
 
             // 등급 색상
@@ -388,12 +384,12 @@ public partial class ItemSimulatorViewModel : ViewModelBase
     private void UpdateSummaryUi()
     {
         var s = _itemSimulator.Summary;
-        SummaryAttack      .Update(s.Attack);
-        SummaryArmor       .Update(s.Armor);
-        SummaryHP          .Update(s.HP);
-        SummaryMP          .Update(s.MP);
-        SummaryStrength    .Update(s.Strength);
-        SummaryAgility     .Update(s.Agility);
+        SummaryAttack.Update(s.Attack);
+        SummaryArmor.Update(s.Armor);
+        SummaryHP.Update(s.HP);
+        SummaryMP.Update(s.MP);
+        SummaryStrength.Update(s.Strength);
+        SummaryAgility.Update(s.Agility);
         SummaryIntelligence.Update(s.Inteligence);
 
         UniqueOptionsDocument = ItemInfoWpfExtensions.BuildUniqueOptionsDocument(s.UniqueOptions);
@@ -503,7 +499,7 @@ public partial class ItemSimulatorViewModel : ViewModelBase
     private void NavigateChoice(ButtonItemVM vm)
     {
         IsNavPreviousPopupOpen = false;
-        IsNavNextPopupOpen     = false;
+        IsNavNextPopupOpen = false;
         SearchItemVM.ForceSelectItem(vm.Item);
     }
 

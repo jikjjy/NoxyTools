@@ -3,13 +3,7 @@ using NoxyTools.Core.Services;
 using NoxyTools.Wpf.Services;
 using NoxyTools.Wpf.ViewModels;
 using NoxyTools.Wpf.Views;
-using System;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using NoxyTools.Core.Model;
-using Noxypedia;
 
 namespace NoxyTools.Wpf;
 
@@ -95,7 +89,7 @@ public partial class App : Application
         // --- 업데이트 서비스 ---
         services.AddSingleton(_ => new GitHubUpdateService(
             repoOwner: "jikjjy",
-            repoName:  "NoxyTools"));
+            repoName: "NoxyTools"));
         services.AddSingleton<UpdateViewModel>();
 
         // --- UI 서비스 ---

@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using Noxypedia.Model;
+﻿using Noxypedia.Model;
 using Noxypedia.Utils;
 
 namespace Noxypedia

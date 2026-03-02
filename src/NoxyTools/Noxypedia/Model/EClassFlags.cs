@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Noxypedia.Model
+﻿namespace Noxypedia.Model
 {
     [Flags]
     public enum EClassFlags

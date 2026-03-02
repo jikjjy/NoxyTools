@@ -1,7 +1,5 @@
 using Noxypedia.Model;
 using SevenZip.Compression.LZMA;
-using System;
-using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.Json;
@@ -22,9 +20,9 @@ namespace Noxypedia.Utils
         // ─── JSON 옵션 ────────────────────────────────────────────────────
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
-            ReferenceHandler     = ReferenceHandler.Preserve,   // 순환 참조 처리
+            ReferenceHandler = ReferenceHandler.Preserve,   // 순환 참조 처리
             MaxDepth = 1024,
-            WriteIndented        = false,                       // 압축 출력 (파일 크기 최소화)
+            WriteIndented = false,                       // 압축 출력 (파일 크기 최소화)
             Converters =
             {
                 new ColorJsonConverter(),
@@ -48,7 +46,7 @@ namespace Noxypedia.Utils
                 Directory.CreateDirectory(dir);
 
             // 1. JSON 직렬화
-            var json  = JsonSerializer.Serialize(data, _jsonOptions);
+            var json = JsonSerializer.Serialize(data, _jsonOptions);
             var bytes = Encoding.UTF8.GetBytes(json);
 
             // 2. LZMA 압축
@@ -94,14 +92,14 @@ namespace Noxypedia.Utils
             var version = BitConverter.ToInt32(header, 4);
 
             // 3. 압축 데이터 읽기
-            var remaining  = (int)(fs.Length - HEADER_SIZE);
+            var remaining = (int)(fs.Length - HEADER_SIZE);
             var compressed = new byte[remaining];
             fs.Read(compressed, 0, remaining);
 
             // 4. LZMA 해제 + JSON 역직렬화
             var decompressed = SevenZipHelper.Decompress(compressed);
-            var json         = Encoding.UTF8.GetString(decompressed);
-            var data         = JsonSerializer.Deserialize<NoxypediaSet>(json, _jsonOptions)
+            var json = Encoding.UTF8.GetString(decompressed);
+            var data = JsonSerializer.Deserialize<NoxypediaSet>(json, _jsonOptions)
                                ?? throw new InvalidDataException("NoxypediaSet 역직렬화에 실패했습니다.");
 
             var allItems = data.CraftRecipes.Cast<BaseModel>()
@@ -136,7 +134,7 @@ namespace Noxypedia.Utils
             try
             {
                 var decompressed = SevenZipHelper.Decompress(rawBytes);
-                var data         = deserializeBinaryFormatter(decompressed);
+                var data = deserializeBinaryFormatter(decompressed);
                 return (data, 0);
             }
             catch { /* LZMA 해제 실패 또는 BinaryFormatter 역직렬화 실패 → 형식 2 시도 */ }
@@ -172,9 +170,9 @@ namespace Noxypedia.Utils
 
         private static NoxypediaSet deserializeBinaryFormatter(byte[] bytes)
         {
-            using var ms        = new MemoryStream(bytes);
-            var       formatter = new BinaryFormatter();
-            var       obj       = formatter.Deserialize(ms);
+            using var ms = new MemoryStream(bytes);
+            var formatter = new BinaryFormatter();
+            var obj = formatter.Deserialize(ms);
             return obj as NoxypediaSet
                 ?? throw new InvalidCastException($"역직렬화 결과가 NoxypediaSet이 아닙니다. (실제 타입: {obj?.GetType().FullName})");
         }

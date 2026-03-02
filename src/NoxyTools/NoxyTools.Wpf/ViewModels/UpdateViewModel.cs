@@ -2,11 +2,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NoxyTools.Core.Model;
 using NoxyTools.Core.Services;
-using System;
 using System.IO;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace NoxyTools.Wpf.ViewModels;
 
@@ -103,10 +100,10 @@ public partial class UpdateViewModel : ObservableObject, IDisposable
                 return;
             }
 
-            LatestRelease   = release;
-            LatestVersion   = release.TagName;
-            ReleaseNotes    = release.Body;
-            ReleasePageUrl  = release.HtmlUrl;
+            LatestRelease = release;
+            LatestVersion = release.TagName;
+            ReleaseNotes = release.Body;
+            ReleasePageUrl = release.HtmlUrl;
 
             var currentVer = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 0, 0);
             IsUpdateAvailable = _gitHub.IsUpdateAvailable(currentVer, release);
@@ -140,9 +137,9 @@ public partial class UpdateViewModel : ObservableObject, IDisposable
             return;
         }
 
-        IsBusy          = true;
+        IsBusy = true;
         DownloadProgress = 0;
-        StatusMessage   = "다운로드 준비 중...";
+        StatusMessage = "다운로드 준비 중...";
 
         var destPath = Path.Combine(
             Path.GetTempPath(), "NoxyTools_Update", "NoxyToolsSetup.exe");
@@ -153,27 +150,27 @@ public partial class UpdateViewModel : ObservableObject, IDisposable
             var progress = new Progress<int>(p =>
             {
                 DownloadProgress = p;
-                StatusMessage    = $"다운로드 중... {p}%";
+                StatusMessage = $"다운로드 중... {p}%";
             });
 
             await _gitHub.DownloadAssetAsync(
                 asset.BrowserDownloadUrl, destPath,
                 progress, maxRetries: 3, ct: _cts.Token);
 
-            StatusMessage   = "설치 파일 실행 중...";
-            IsInstalling    = true;
+            StatusMessage = "설치 파일 실행 중...";
+            IsInstalling = true;
 
             // 설치 프로그램 실행 → 앱 종료
             LaunchInstallerAndClose(destPath);
         }
         catch (OperationCanceledException)
         {
-            StatusMessage    = "다운로드가 취소되었습니다.";
+            StatusMessage = "다운로드가 취소되었습니다.";
             DownloadProgress = 0;
         }
         catch (Exception ex)
         {
-            StatusMessage    = $"다운로드 실패: {ex.Message}";
+            StatusMessage = $"다운로드 실패: {ex.Message}";
             DownloadProgress = 0;
         }
         finally
@@ -196,8 +193,8 @@ public partial class UpdateViewModel : ObservableObject, IDisposable
     // ─────────────────────────────────────────────────────────────
 
     private bool CanCheckOrDownload() => !IsBusy;
-    private bool CanDownload()        => !IsBusy && IsUpdateAvailable;
-    private bool CanCancel()          => IsBusy;
+    private bool CanDownload() => !IsBusy && IsUpdateAvailable;
+    private bool CanCancel() => IsBusy;
 
     // ─────────────────────────────────────────────────────────────
     // 내부 유틸

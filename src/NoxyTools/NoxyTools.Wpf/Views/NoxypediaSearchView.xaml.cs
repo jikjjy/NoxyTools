@@ -1,9 +1,9 @@
+using NoxyTools.Wpf.ViewModels;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
-using NoxyTools.Wpf.ViewModels;
 
 namespace NoxyTools.Wpf.Views;
 
@@ -85,10 +85,10 @@ public partial class NoxypediaSearchView : UserControl
 
     private void SyncAllDocuments()
     {
-        SyncDocument(InfoRichTextBox,       _vm?.InfoDocument);
+        SyncDocument(InfoRichTextBox, _vm?.InfoDocument);
         SyncDocument(DropCreepsRichTextBox, _vm?.DropCreepsDocument);
-        SyncDocument(TechRichTextBox,       _vm?.TechDocument);
-        SyncDocument(TechGradeRichTextBox,  _vm?.TechGradeDocument);
+        SyncDocument(TechRichTextBox, _vm?.TechDocument);
+        SyncDocument(TechGradeRichTextBox, _vm?.TechGradeDocument);
     }
 
     private static void SyncDocument(RichTextBox rtb, FlowDocument? doc)

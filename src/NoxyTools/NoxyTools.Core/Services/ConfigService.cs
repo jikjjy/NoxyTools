@@ -176,10 +176,10 @@ namespace NoxyTools.Core.Services
                 if (!Enum.TryParse<RegistryValueKind>(v.Kind, out var kind)) continue;
                 object boxed = kind switch
                 {
-                    RegistryValueKind.DWord  => (object)Convert.ToInt32(v.Data),
-                    RegistryValueKind.QWord  => Convert.ToInt64(v.Data),
+                    RegistryValueKind.DWord => (object)Convert.ToInt32(v.Data),
+                    RegistryValueKind.QWord => Convert.ToInt64(v.Data),
                     RegistryValueKind.Binary => Convert.FromBase64String(v.Data),
-                    _                        => v.Data
+                    _ => v.Data
                 };
                 key.SetValue(v.Name, boxed, kind);
             }
@@ -201,9 +201,9 @@ namespace NoxyTools.Core.Services
 
         private sealed class RegistryValue
         {
-            [JsonPropertyName("name")]  public string Name { get; set; } = string.Empty;
-            [JsonPropertyName("kind")]  public string Kind { get; set; } = string.Empty;
-            [JsonPropertyName("data")]  public string Data { get; set; } = string.Empty;
+            [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
+            [JsonPropertyName("kind")] public string Kind { get; set; } = string.Empty;
+            [JsonPropertyName("data")] public string Data { get; set; } = string.Empty;
         }
     }
 }

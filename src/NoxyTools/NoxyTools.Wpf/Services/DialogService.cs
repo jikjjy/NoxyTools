@@ -1,12 +1,8 @@
 using Microsoft.Win32;
 using Noxypedia.Model;
-using NoxyTools.Core.Model;
 using NoxyTools.Core.Services;
 using NoxyTools.Wpf.ViewModels;
 using NoxyTools.Wpf.Views;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 
 namespace NoxyTools.Wpf.Services;
@@ -68,7 +64,7 @@ public class DialogService : IDialogService
     {
         var vm = new ListEditorViewModel
         {
-            LeftTitle  = leftTitle,
+            LeftTitle = leftTitle,
             RightTitle = rightTitle
         };
         vm.Configure(maxCount);

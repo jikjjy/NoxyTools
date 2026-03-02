@@ -20,13 +20,13 @@ public partial class MakeValidReportView : UserControl
         if (e.OldValue is MakeValidReportViewModel oldVm)
         {
             oldVm.PropertyChanged -= OnViewModelPropertyChanged;
-            oldVm.CopyRequested   -= OnCopyRequested;
+            oldVm.CopyRequested -= OnCopyRequested;
         }
 
         if (e.NewValue is MakeValidReportViewModel newVm)
         {
             newVm.PropertyChanged += OnViewModelPropertyChanged;
-            newVm.CopyRequested   += OnCopyRequested;
+            newVm.CopyRequested += OnCopyRequested;
             newVm.RequestDocumentRefresh();
         }
     }

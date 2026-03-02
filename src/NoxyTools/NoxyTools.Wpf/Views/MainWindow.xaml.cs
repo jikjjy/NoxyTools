@@ -1,7 +1,5 @@
-using NoxyTools.Core.Model;
 using NoxyTools.Core.Services;
 using NoxyTools.Wpf.ViewModels;
-using System;
 using System.Windows;
 
 namespace NoxyTools.Wpf.Views;
@@ -16,8 +14,8 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = viewModel;
         _viewModel = viewModel;
-        _config    = config;
-        Loaded  += OnLoaded;
+        _config = config;
+        Loaded += OnLoaded;
         Closing += OnClosing;
     }
 
@@ -29,21 +27,21 @@ public partial class MainWindow : Window
 
     private void RestoreWindowBounds()
     {
-        var loc  = _config.MainWindowLocation;
+        var loc = _config.MainWindowLocation;
         var size = _config.MainWindowSize;
 
         // 저장된 위치가 실제 가상 화면 영역 내에 있는지 확인 (모니터 분리 대비)
-        double vLeft   = SystemParameters.VirtualScreenLeft;
-        double vTop    = SystemParameters.VirtualScreenTop;
-        double vRight  = vLeft + SystemParameters.VirtualScreenWidth;
-        double vBottom = vTop  + SystemParameters.VirtualScreenHeight;
+        double vLeft = SystemParameters.VirtualScreenLeft;
+        double vTop = SystemParameters.VirtualScreenTop;
+        double vRight = vLeft + SystemParameters.VirtualScreenWidth;
+        double vBottom = vTop + SystemParameters.VirtualScreenHeight;
 
-        double left = Math.Max(vLeft, Math.Min(loc.X, vRight  - 200));
-        double top  = Math.Max(vTop,  Math.Min(loc.Y, vBottom - 100));
+        double left = Math.Max(vLeft, Math.Min(loc.X, vRight - 200));
+        double top = Math.Max(vTop, Math.Min(loc.Y, vBottom - 100));
 
-        Left   = left;
-        Top    = top;
-        Width  = Math.Min(size.Width,  SystemParameters.VirtualScreenWidth);
+        Left = left;
+        Top = top;
+        Width = Math.Min(size.Width, SystemParameters.VirtualScreenWidth);
         Height = Math.Min(size.Height, SystemParameters.VirtualScreenHeight);
 
         // 0=Normal, 2=Maximized (Minimized는 복원하지 않음)
@@ -64,7 +62,7 @@ public partial class MainWindow : Window
         // Maximized일 때 RestoreBounds로 Normal 크기/위치 저장
         var bounds = WindowState == WindowState.Maximized ? RestoreBounds : new Rect(Left, Top, Width, Height);
         _config.MainWindowLocation = new System.Drawing.Point((int)bounds.X, (int)bounds.Y);
-        _config.MainWindowSize     = new System.Drawing.Size((int)bounds.Width, (int)bounds.Height);
+        _config.MainWindowSize = new System.Drawing.Size((int)bounds.Width, (int)bounds.Height);
     }
 
     // ── 커스텀 타이틀 바 ─────────────────────────────────────────

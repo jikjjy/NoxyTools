@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Noxypedia.Model
+﻿namespace Noxypedia.Model
 {
     [Serializable]
     public class BaseModel

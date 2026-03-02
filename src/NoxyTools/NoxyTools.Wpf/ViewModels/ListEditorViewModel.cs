@@ -1,11 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NoxyTools.Wpf.ViewModels.Base;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 
@@ -19,20 +16,20 @@ public partial class ListEditorViewModel : ViewModelBase
 {
     // ── 컬렉션 ────────────────────────────────────────────────────
 
-    public ObservableCollection<ListEditorEntry> LeftItems  { get; } = new();
+    public ObservableCollection<ListEditorEntry> LeftItems { get; } = new();
     public ObservableCollection<ListEditorEntry> RightItems { get; } = new();
 
-    public ICollectionView LeftView  { get; }
+    public ICollectionView LeftView { get; }
     public ICollectionView RightView { get; }
 
     // ── 필터 ──────────────────────────────────────────────────────
 
-    [ObservableProperty] private string _leftFilter  = "";
+    [ObservableProperty] private string _leftFilter = "";
     [ObservableProperty] private string _rightFilter = "";
 
     // ── 제목 ──────────────────────────────────────────────────────
 
-    [ObservableProperty] private string _leftTitle  = "전체 목록";
+    [ObservableProperty] private string _leftTitle = "전체 목록";
     [ObservableProperty] private string _rightTitle = "선택 목록";
 
     // ── 최대 개수 (0 = 제한 없음) ─────────────────────────────────
@@ -50,8 +47,8 @@ public partial class ListEditorViewModel : ViewModelBase
 
     public ListEditorViewModel()
     {
-        LeftView  = CollectionViewSource.GetDefaultView(LeftItems);
-        LeftView.Filter  = FilterLeft;
+        LeftView = CollectionViewSource.GetDefaultView(LeftItems);
+        LeftView.Filter = FilterLeft;
 
         RightView = CollectionViewSource.GetDefaultView(RightItems);
         RightView.Filter = FilterRight;
@@ -69,7 +66,7 @@ public partial class ListEditorViewModel : ViewModelBase
            && (string.IsNullOrEmpty(RightFilter)
                || e.DisplayName.Contains(RightFilter, StringComparison.OrdinalIgnoreCase));
 
-    partial void OnLeftFilterChanged(string value)  => LeftView.Refresh();
+    partial void OnLeftFilterChanged(string value) => LeftView.Refresh();
     partial void OnRightFilterChanged(string value) => RightView.Refresh();
 
     // ── 설정 헬퍼 ─────────────────────────────────────────────────

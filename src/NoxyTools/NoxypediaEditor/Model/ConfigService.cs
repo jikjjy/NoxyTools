@@ -1,8 +1,4 @@
-﻿using System;
-using System.Drawing;
-using System.IO;
-
-namespace NoxypediaEditor.Model
+﻿namespace NoxypediaEditor.Model
 {
     public class ConfigService
     {

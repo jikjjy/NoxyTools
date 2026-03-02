@@ -1,10 +1,10 @@
+using NoxyTools.Wpf.ViewModels;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using NoxyTools.Wpf.ViewModels;
 
 namespace NoxyTools.Wpf.Views;
 
@@ -69,7 +69,7 @@ public partial class ItemSimulatorView : UserControl
 
     private void SyncAllDocuments()
     {
-        SyncDoc(InfoDetailRichTextBox,   _vm?.InfoDocument);
+        SyncDoc(InfoDetailRichTextBox, _vm?.InfoDocument);
         SyncDoc(UniqueOptionsRichTextBox, _vm?.UniqueOptionsDocument);
     }
 

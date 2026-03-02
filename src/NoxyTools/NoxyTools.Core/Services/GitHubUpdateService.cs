@@ -1,6 +1,5 @@
 using NoxyTools.Core.Model;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -18,7 +17,7 @@ namespace NoxyTools.Core.Services;
 public class GitHubUpdateService : IDisposable
 {
     private const string GITHUB_API_BASE = "https://api.github.com";
-    private const string USER_AGENT      = "NoxyTools-Updater/1.0";
+    private const string USER_AGENT = "NoxyTools-Updater/1.0";
 
     private readonly string _repoOwner;
     private readonly string _repoName;
@@ -35,7 +34,7 @@ public class GitHubUpdateService : IDisposable
     public GitHubUpdateService(string repoOwner, string repoName, string? githubToken = null)
     {
         _repoOwner = repoOwner;
-        _repoName  = repoName;
+        _repoName = repoName;
 
         _httpClient = new HttpClient();
         _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(USER_AGENT);
@@ -56,68 +55,68 @@ public class GitHubUpdateService : IDisposable
 
     /// <summary>
     /// GitHub 최신 릴리즈 정보를 조회합니다.
-        /// 네트워크 오류, 404(릴리즈 없음), 403/429(Rate Limit) 시 null을 반환합니다.
-        /// 오류 원인은 <paramref name="errorReason"/>으로 전달됩니다.
-        /// </summary>
-        public async Task<GitHubRelease?> GetLatestReleaseAsync(
-            CancellationToken ct = default,
-            Action<string>? onError = null)
+    /// 네트워크 오류, 404(릴리즈 없음), 403/429(Rate Limit) 시 null을 반환합니다.
+    /// 오류 원인은 <paramref name="errorReason"/>으로 전달됩니다.
+    /// </summary>
+    public async Task<GitHubRelease?> GetLatestReleaseAsync(
+        CancellationToken ct = default,
+        Action<string>? onError = null)
+    {
+        var url = $"{GITHUB_API_BASE}/repos/{_repoOwner}/{_repoName}/releases/latest";
+        try
         {
-            var url = $"{GITHUB_API_BASE}/repos/{_repoOwner}/{_repoName}/releases/latest";
-            try
+            var response = await _httpClient.GetAsync(url, ct);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Forbidden ||
+                (int)response.StatusCode == 429)
             {
-                var response = await _httpClient.GetAsync(url, ct);
-
-                if (response.StatusCode == System.Net.HttpStatusCode.Forbidden ||
-                    (int)response.StatusCode == 429)
-                {
-                    // GitHub API Rate Limit
-                    var resetHeader = response.Headers.Contains("X-RateLimit-Reset")
-                        ? response.Headers.GetValues("X-RateLimit-Reset").FirstOrDefault()
-                        : null;
-                    string resetMsg = resetHeader != null &&
-                        long.TryParse(resetHeader, out var resetEpoch)
-                            ? $" (초기화: {DateTimeOffset.FromUnixTimeSeconds(resetEpoch):HH:mm:ss})"
-                            : string.Empty;
-                    onError?.Invoke($"GitHub API 요청 한도 초과{resetMsg}. 잠시 후 다시 시도하세요.");
-                    return null;
-                }
-
-                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    onError?.Invoke("릴리즈 정보를 찾을 수 없습니다.");
-                    return null;
-                }
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    onError?.Invoke($"GitHub API 오류: {(int)response.StatusCode}");
-                    return null;
-                }
-
-                var json = await response.Content.ReadAsStringAsync(ct);
-                return JsonSerializer.Deserialize<GitHubRelease>(json, _jsonOptions);
-            }
-            catch (HttpRequestException)
-            {
-                onError?.Invoke("네트워크에 연결할 수 없습니다. 인터넷 연결을 확인하세요.");
+                // GitHub API Rate Limit
+                var resetHeader = response.Headers.Contains("X-RateLimit-Reset")
+                    ? response.Headers.GetValues("X-RateLimit-Reset").FirstOrDefault()
+                    : null;
+                string resetMsg = resetHeader != null &&
+                    long.TryParse(resetHeader, out var resetEpoch)
+                        ? $" (초기화: {DateTimeOffset.FromUnixTimeSeconds(resetEpoch):HH:mm:ss})"
+                        : string.Empty;
+                onError?.Invoke($"GitHub API 요청 한도 초과{resetMsg}. 잠시 후 다시 시도하세요.");
                 return null;
             }
-            catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                onError?.Invoke("요청 시간이 초과되었습니다.");
+                onError?.Invoke("릴리즈 정보를 찾을 수 없습니다.");
                 return null;
             }
-            catch (TaskCanceledException)
+
+            if (!response.IsSuccessStatusCode)
             {
-                return null;  // 사용자가 취소한 경우
-            }
-            catch (JsonException)
-            {
-                onError?.Invoke("버전 정보 형식이 올바르지 않습니다.");
+                onError?.Invoke($"GitHub API 오류: {(int)response.StatusCode}");
                 return null;
             }
+
+            var json = await response.Content.ReadAsStringAsync(ct);
+            return JsonSerializer.Deserialize<GitHubRelease>(json, _jsonOptions);
         }
+        catch (HttpRequestException)
+        {
+            onError?.Invoke("네트워크에 연결할 수 없습니다. 인터넷 연결을 확인하세요.");
+            return null;
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            onError?.Invoke("요청 시간이 초과되었습니다.");
+            return null;
+        }
+        catch (TaskCanceledException)
+        {
+            return null;  // 사용자가 취소한 경우
+        }
+        catch (JsonException)
+        {
+            onError?.Invoke("버전 정보 형식이 올바르지 않습니다.");
+            return null;
+        }
+    }
 
     // ─────────────────────────────────────────────────────────────
     // 버전 비교
@@ -210,7 +209,7 @@ public class GitHubUpdateService : IDisposable
     {
         var totalBytes = (response.Content.Headers.ContentLength ?? -1L) + resumeOffset;
 
-        using var srcStream  = await response.Content.ReadAsStreamAsync(ct);
+        using var srcStream = await response.Content.ReadAsStreamAsync(ct);
         using var destStream = new FileStream(tempPath,
             resumeOffset > 0 ? FileMode.Append : FileMode.Create,
             FileAccess.Write, FileShare.None, 81920, true);

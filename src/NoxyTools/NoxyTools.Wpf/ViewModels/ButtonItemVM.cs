@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using Noxypedia;
 using Noxypedia.Model;
 using System.Windows.Media.Imaging;
 
@@ -11,7 +10,7 @@ namespace NoxyTools.Wpf.ViewModels;
 public partial class ButtonItemVM : ObservableObject
 {
     public ItemSet Item { get; }
-    public string  Text { get; }
+    public string Text { get; }
 
     /// <summary>이미지 URL — CacheService.RequestImage() 호출 후 ImageReady 이벤트로 갱신됩니다.</summary>
     public string? ImageUrl { get; }
@@ -23,9 +22,9 @@ public partial class ButtonItemVM : ObservableObject
 
     public ButtonItemVM(ItemSet item, string text, string? imageUrl = null, BitmapSource? image = null)
     {
-        Item     = item;
-        Text     = text;
+        Item = item;
+        Text = text;
         ImageUrl = imageUrl;
-        _image   = image;
+        _image = image;
     }
 }

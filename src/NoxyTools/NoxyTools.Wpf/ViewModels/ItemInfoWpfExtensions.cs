@@ -1,9 +1,5 @@
 using Noxypedia.Model;
-using NoxyTools.Core.Model;
 using NoxyTools.Core.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -19,13 +15,13 @@ internal static class ItemInfoWpfExtensions
     private static readonly IReadOnlyDictionary<string, EClassFlags> _classNames =
         new Dictionary<string, EClassFlags>
         {
-            ["공용"]     = EClassFlags.Common,
-            ["기사"]     = EClassFlags.Knight,
-            ["마법사"]   = EClassFlags.Wizard,
-            ["힐러"]     = EClassFlags.Priest,
-            ["궁수"]     = EClassFlags.Archer,
+            ["공용"] = EClassFlags.Common,
+            ["기사"] = EClassFlags.Knight,
+            ["마법사"] = EClassFlags.Wizard,
+            ["힐러"] = EClassFlags.Priest,
+            ["궁수"] = EClassFlags.Archer,
             ["드루이드"] = EClassFlags.Druid,
-            ["용술사"]   = EClassFlags.Summoner
+            ["용술사"] = EClassFlags.Summoner
         };
 
     // ── 공통 브러시 ─────────────────────────────────────────────────────────
@@ -93,20 +89,20 @@ internal static class ItemInfoWpfExtensions
                     var para = new Paragraph { Margin = new Thickness(0) };
                     AppendDefault(para, padL + label + padR + ": ");
                     para.Inlines.Add(new Run($"{v:+#,0;-#,0;}")
-                        { Foreground = v >= 0 ? FgPositive : FgNegative });
+                    { Foreground = v >= 0 ? FgPositive : FgNegative });
                     if (suffix != null && v > 0)
                         AppendDefault(para, "\t" + suffix);
                     doc.Blocks.Add(para);
                 }
 
-                AppendStat("힘",    item.Strength,
+                AppendStat("힘", item.Strength,
                     $"(체력　: {item.Strength.GetValueOrDefault() * ItemSimulatorService.HP_PER_STATE:+#,0;-#,0;})");
-                AppendStat("민첩",  item.Agility,
-                    $"(방어력: {item.Agility.GetValueOrDefault()   * ItemSimulatorService.ARMOR_PER_STATE:+#,0;-#,0;})");
-                AppendStat("지능",  item.Inteligence,
+                AppendStat("민첩", item.Agility,
+                    $"(방어력: {item.Agility.GetValueOrDefault() * ItemSimulatorService.ARMOR_PER_STATE:+#,0;-#,0;})");
+                AppendStat("지능", item.Inteligence,
                     $"(마나　: {item.Inteligence.GetValueOrDefault() * ItemSimulatorService.MP_PER_STATE:+#,0;-#,0;})");
-                AppendStat("체력",  item.HP);
-                AppendStat("마나",  item.MP);
+                AppendStat("체력", item.HP);
+                AppendStat("마나", item.MP);
                 AppendStat("공격력", item.Attack);
                 AppendStat("방어력", item.Armor);
                 doc.Blocks.Add(EmptyPara());
@@ -204,8 +200,8 @@ internal static class ItemInfoWpfExtensions
 
         // 테크 경로 계산 (WinForms와 동일 로직)
         var techItems = BuildTechPath(currentItem, beginItem, finalItem);
-        var allNames  = new HashSet<string>(techItems.Select(i => i.Name));
-        string nl     = detailOption ? "\n\t" : string.Empty;
+        var allNames = new HashSet<string>(techItems.Select(i => i.Name));
+        string nl = detailOption ? "\n\t" : string.Empty;
 
         foreach (var item in techItems)
         {
@@ -266,32 +262,32 @@ internal static class ItemInfoWpfExtensions
     public static FlowDocument BuildUniqueOptionsDocument(IEnumerable<UniqueOptionSet> options)
     {
         var doc = MakeDoc();
-        const string OPTION_DODGE        = "회피";
+        const string OPTION_DODGE = "회피";
         const string OPTION_MAGIC_REGIST = "마방";
 
         var optList = options.ToList();
-        bool dupDodge       = optList.Count(o => o.Name.Contains(OPTION_DODGE))        > 1;
+        bool dupDodge = optList.Count(o => o.Name.Contains(OPTION_DODGE)) > 1;
         bool dupMagicRegist = optList.Count(o => o.Name.Contains(OPTION_MAGIC_REGIST)) > 1;
 
         foreach (var group in optList.GroupBy(o => o.Name).OrderBy(g => g.Key))
         {
             var para = new Paragraph { Margin = new Thickness(0) };
             para.Inlines.Add(new Run($"「{group.Key}」")
-                { FontWeight = System.Windows.FontWeights.Bold, Foreground = FgDefault });
+            { FontWeight = System.Windows.FontWeights.Bold, Foreground = FgDefault });
             var desc = group.First().EffectDescription ?? "";
             if (!string.IsNullOrWhiteSpace(desc))
                 para.Inlines.Add(new Run($" {desc}")
-                    { FontSize = 10, Foreground = FgSecondary });
+                { FontSize = 10, Foreground = FgSecondary });
 
             if (group.Count() > 1)
                 para.Inlines.Add(new Run($" (중복: {group.Count()}개)")
-                    { Foreground = FgOrange });
+                { Foreground = FgOrange });
             if (dupDodge && group.Key.Contains(OPTION_DODGE))
                 para.Inlines.Add(new Run(" (회피 중복)")
-                    { Foreground = FgOrange });
+                { Foreground = FgOrange });
             if (dupMagicRegist && group.Key.Contains(OPTION_MAGIC_REGIST))
                 para.Inlines.Add(new Run(" (마방 중복)")
-                    { Foreground = FgOrange });
+                { Foreground = FgOrange });
 
             doc.Blocks.Add(para);
         }
@@ -341,25 +337,25 @@ internal static class ItemInfoWpfExtensions
     private static FlowDocument MakeDoc() => new()
     {
         FontFamily = new System.Windows.Media.FontFamily("맑은 고딕, Malgun Gothic"),
-        FontSize   = 12,
+        FontSize = 12,
         Background = BgDoc,
         Foreground = FgDefault,
         PagePadding = new Thickness(8),
-        LineHeight  = 18
+        LineHeight = 18
     };
 
     private static Paragraph Para(string text, SolidColorBrush? fg = null)
     {
         var p = new Paragraph(new Run(text) { Foreground = fg ?? FgDefault })
-            { Margin = new Thickness(0) };
+        { Margin = new Thickness(0) };
         return p;
     }
 
     private static Paragraph Bold(string text, FlowDocument doc)
     {
         var p = new Paragraph(new Run(text)
-            { Foreground = FgDefault, FontWeight = System.Windows.FontWeights.Bold })
-            { Margin = new Thickness(0) };
+        { Foreground = FgDefault, FontWeight = System.Windows.FontWeights.Bold })
+        { Margin = new Thickness(0) };
         return p;
     }
 

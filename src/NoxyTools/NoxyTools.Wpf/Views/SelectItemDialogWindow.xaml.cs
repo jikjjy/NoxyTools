@@ -1,5 +1,4 @@
 using NoxyTools.Wpf.ViewModels;
-using System;
 using System.Windows;
 
 namespace NoxyTools.Wpf.Views;

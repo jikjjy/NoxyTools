@@ -1,14 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Noxypedia.Model;
-using NoxyTools.Core.Model;
 using NoxyTools.Core.Services;
 using NoxyTools.Wpf.ViewModels.Base;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows.Data;
 using System.Windows.Threading;
 
@@ -81,11 +77,11 @@ public partial class SearchItemViewModel : ViewModelBase
     private static readonly IReadOnlyDictionary<string, EClassFlags> ClassMap =
         new Dictionary<string, EClassFlags>
         {
-            ["공용"]   = EClassFlags.Common,
-            ["기사"]   = EClassFlags.Knight,
+            ["공용"] = EClassFlags.Common,
+            ["기사"] = EClassFlags.Knight,
             ["마법사"] = EClassFlags.Wizard,
-            ["힐러"]   = EClassFlags.Priest,
-            ["궁수"]   = EClassFlags.Archer,
+            ["힐러"] = EClassFlags.Priest,
+            ["궁수"] = EClassFlags.Archer,
             ["드루이드"] = EClassFlags.Druid,
             ["용술사"] = EClassFlags.Summoner
         };
@@ -201,14 +197,14 @@ public partial class SearchItemViewModel : ViewModelBase
         _filterTimer.Start(); // 300ms 디바운스
     }
 
-    partial void OnIsGradeFilterEnabledChanged(bool value)    => RefreshFilter();
-    partial void OnFilterGradeChanged(string value)          => RefreshFilter();
-    partial void OnIsPartFilterEnabledChanged(bool value)    => RefreshFilter();
-    partial void OnFilterPartChanged(string value)           => RefreshFilter();
-    partial void OnIsClassFilterEnabledChanged(bool value)   => RefreshFilter();
-    partial void OnFilterClassChanged(string value)          => RefreshFilter();
+    partial void OnIsGradeFilterEnabledChanged(bool value) => RefreshFilter();
+    partial void OnFilterGradeChanged(string value) => RefreshFilter();
+    partial void OnIsPartFilterEnabledChanged(bool value) => RefreshFilter();
+    partial void OnFilterPartChanged(string value) => RefreshFilter();
+    partial void OnIsClassFilterEnabledChanged(bool value) => RefreshFilter();
+    partial void OnFilterClassChanged(string value) => RefreshFilter();
     partial void OnIsUniqueOptionFilterEnabledChanged(bool value) => RefreshFilter();
-    partial void OnFilterUniqueOptionChanged(string value)   => RefreshFilter();
+    partial void OnFilterUniqueOptionChanged(string value) => RefreshFilter();
     partial void OnIsFavoriteOnlyViewChanged(bool value)
     {
         RefreshFilter();
@@ -298,7 +294,7 @@ public partial class SearchItemViewModel : ViewModelBase
     private void UpdateNavigationState()
     {
         CanNavigatePrevious = _historyIndex > 0;
-        CanNavigateNext     = _historyIndex < _history.Count - 1;
+        CanNavigateNext = _historyIndex < _history.Count - 1;
         NavigatePreviousCommand.NotifyCanExecuteChanged();
         NavigateNextCommand.NotifyCanExecuteChanged();
     }

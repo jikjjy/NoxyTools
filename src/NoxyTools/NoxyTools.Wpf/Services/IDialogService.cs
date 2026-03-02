@@ -1,6 +1,4 @@
 using Noxypedia.Model;
-using System;
-using System.Collections.Generic;
 
 namespace NoxyTools.Wpf.Services;
 

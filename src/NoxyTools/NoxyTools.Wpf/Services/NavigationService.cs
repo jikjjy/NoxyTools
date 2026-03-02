@@ -1,6 +1,6 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using NoxyTools.Wpf.ViewModels.Base;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace NoxyTools.Wpf.Services;
 

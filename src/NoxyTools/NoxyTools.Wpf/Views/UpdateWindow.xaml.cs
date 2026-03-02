@@ -1,7 +1,6 @@
 using NoxyTools.Wpf.ViewModels;
 using System.Diagnostics;
 using System.Windows;
-using System.Windows.Documents;
 
 namespace NoxyTools.Wpf.Views;
 

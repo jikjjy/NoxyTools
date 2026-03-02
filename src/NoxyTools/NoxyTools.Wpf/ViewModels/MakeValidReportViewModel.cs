@@ -5,11 +5,8 @@ using NoxyTools.Core.Model;
 using NoxyTools.Core.Services;
 using NoxyTools.Wpf.Services;
 using NoxyTools.Wpf.ViewModels.Base;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Threading;
@@ -300,10 +297,10 @@ public partial class MakeValidReportViewModel : ViewModelBase
         var updatedData = data;
         updatedData.Data = new CharacterStateSet
         {
-            Strength     = data.Data.Strength,
-            Agility      = data.Data.Agility,
+            Strength = data.Data.Strength,
+            Agility = data.Data.Agility,
             Intelligence = data.Data.Intelligence,
-            Items        = updatedDataItems
+            Items = updatedDataItems
         };
         _config.MakeValidReport.StatisticsData = updatedData;
 
@@ -315,7 +312,7 @@ public partial class MakeValidReportViewModel : ViewModelBase
                 .Where(item => !dataItemNames.Contains(item.Name))
                 .Select(item => new SaveParser.ItemSet
                 {
-                    Name       = item.Name,
+                    Name = item.Name,
                     GradeColor = item.Grade.Color
                 }));
 

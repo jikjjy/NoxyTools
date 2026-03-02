@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace Gen.Utils
+﻿namespace Gen.Utils
 {
     /// <summary>
     /// 해시 코드 생성에 도움을 주는 핼퍼 클래스

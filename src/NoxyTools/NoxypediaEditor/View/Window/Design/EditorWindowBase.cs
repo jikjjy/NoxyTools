@@ -1,7 +1,4 @@
-﻿using System.Drawing;
-using System.Windows.Forms;
-
-namespace NoxypediaEditor
+﻿namespace NoxypediaEditor
 {
     public partial class EditorWindowBase : Form
     {

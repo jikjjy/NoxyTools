@@ -195,19 +195,19 @@ namespace NoxyTools.Core.Services
                 return sb.ToString();
             }
 
-            var sd       = config.MakeValidReport.StatisticsData;
+            var sd = config.MakeValidReport.StatisticsData;
             var getItems = statistics.NewItems.ToList();
 
             void Line(string text) => sb.Append($"<div>{E(text)}</div>");
-            void Sep()             => sb.Append("<div>_______________________________________________</div>");
+            void Sep() => sb.Append("<div>_______________________________________________</div>");
             void ItemLine(ItemSet item)
             {
-                string gc        = Hex(item.GradeColor);
+                string gc = Hex(item.GradeColor);
                 string gradeName = $"［{item.GradeName.Replace("_", "－")}］";
-                string lead      = statistics.GetLeftSpacing(gradeName,  9, StatisticsService.Align.Right);
-                string trail     = statistics.GetRightSpacing(gradeName, 9, StatisticsService.Align.Right);
+                string lead = statistics.GetLeftSpacing(gradeName, 9, StatisticsService.Align.Right);
+                string trail = statistics.GetRightSpacing(gradeName, 9, StatisticsService.Align.Right);
                 sb.Append("<div>");
-                if (lead.Length  > 0) sb.Append(E(lead));
+                if (lead.Length > 0) sb.Append(E(lead));
                 sb.Append($"<span style=\"color:{gc};font-weight:bold;background-color:#1e1e1e\">{E(gradeName)}</span>");
                 if (trail.Length > 0) sb.Append(E(trail));
                 sb.Append($"　{E(item.Name)}</div>");
@@ -240,12 +240,12 @@ namespace NoxyTools.Core.Services
                 sb.Append($"<div>{i + 1:00}. ");
                 if (i < rootItems.Count)
                 {
-                    var item     = rootItems[i];
-                    string gc    = Hex(item.GradeColor);
-                    string gn    = $"［{item.GradeName.Replace("_", "－")}］";
-                    string lead  = statistics.GetLeftSpacing(gn,  9, StatisticsService.Align.Right);
+                    var item = rootItems[i];
+                    string gc = Hex(item.GradeColor);
+                    string gn = $"［{item.GradeName.Replace("_", "－")}］";
+                    string lead = statistics.GetLeftSpacing(gn, 9, StatisticsService.Align.Right);
                     string trail = statistics.GetRightSpacing(gn, 9, StatisticsService.Align.Right);
-                    if (lead.Length  > 0) sb.Append(E(lead));
+                    if (lead.Length > 0) sb.Append(E(lead));
                     sb.Append($"<span style=\"color:{gc};font-weight:bold;background-color:#1e1e1e\">{E(gn)}</span>");
                     if (trail.Length > 0) sb.Append(E(trail));
                     sb.Append($"　{E(item.Name)}");
@@ -263,7 +263,7 @@ namespace NoxyTools.Core.Services
             {
                 string gn = g.ToString().Replace("_", "－");
                 const int space = 7;
-                string title = statistics.GetLeftSpacing(gn,  space, StatisticsService.Align.Left)
+                string title = statistics.GetLeftSpacing(gn, space, StatisticsService.Align.Left)
                     + gn
                     + statistics.GetRightSpacing(gn, space, StatisticsService.Align.Left);
                 int oldCount = 0;
@@ -302,16 +302,16 @@ namespace NoxyTools.Core.Services
         /// </summary>
         public static string WrapAsCfHtml(string htmlFragment)
         {
-            const string tpl  = "Version:0.9\r\nStartHTML:{0:D10}\r\nEndHTML:{1:D10}\r\nStartFragment:{2:D10}\r\nEndFragment:{3:D10}\r\n";
-            const string pre  = "<html><body><!--StartFragment-->";
+            const string tpl = "Version:0.9\r\nStartHTML:{0:D10}\r\nEndHTML:{1:D10}\r\nStartFragment:{2:D10}\r\nEndFragment:{3:D10}\r\n";
+            const string pre = "<html><body><!--StartFragment-->";
             const string post = "<!--EndFragment--></body></html>";
 
             // 오프셋은 UTF-8 바이트 기준
-            int hLen          = Encoding.UTF8.GetByteCount(string.Format(tpl, 0, 0, 0, 0));
-            int startHtml     = hLen;
+            int hLen = Encoding.UTF8.GetByteCount(string.Format(tpl, 0, 0, 0, 0));
+            int startHtml = hLen;
             int startFragment = hLen + Encoding.UTF8.GetByteCount(pre);
-            int endFragment   = startFragment + Encoding.UTF8.GetByteCount(htmlFragment);
-            int endHtml       = endFragment + Encoding.UTF8.GetByteCount(post);
+            int endFragment = startFragment + Encoding.UTF8.GetByteCount(htmlFragment);
+            int endHtml = endFragment + Encoding.UTF8.GetByteCount(post);
 
             return string.Format(tpl, startHtml, endHtml, startFragment, endFragment)
                 + pre + htmlFragment + post;

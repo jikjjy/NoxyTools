@@ -1,5 +1,3 @@
-using System;
-
 namespace NoxyTools.Wpf.Utils
 {
     /// <summary>
@@ -17,9 +15,9 @@ namespace NoxyTools.Wpf.Utils
         // ── 한글 유니코드 상수 ──────────────────────────────────────────
 
         private const char SyllableBase = '\uAC00'; // 가
-        private const char SyllableEnd  = '\uD7A3'; // 힣
-        private const int  JungCount    = 21;
-        private const int  JongCount    = 28;
+        private const char SyllableEnd = '\uD7A3'; // 힣
+        private const int JungCount = 21;
+        private const int JongCount = 28;
 
         // 초성 19개 (유니코드 자모 블록 문자 순서와 동일)
         private static readonly char[] Chosungs =
@@ -36,7 +34,7 @@ namespace NoxyTools.Wpf.Utils
         /// </summary>
         public static bool KoreanContains(string source, string query)
         {
-            if (string.IsNullOrEmpty(query))  return true;
+            if (string.IsNullOrEmpty(query)) return true;
             if (string.IsNullOrEmpty(source)) return false;
 
             // 한글이 없으면 기존 OrdinalIgnoreCase 사용
@@ -81,7 +79,7 @@ namespace NoxyTools.Wpf.Utils
             if (IsSyllable(query) && IsSyllable(src))
             {
                 DecomposeSyllable(query, out int qCho, out int qJung, out int qJong);
-                DecomposeSyllable(src,   out int sCho, out int sJung, out _);
+                DecomposeSyllable(src, out int sCho, out int sJung, out _);
 
                 // 종성 없는 쿼리면 초성+중성만 비교 (받침 있어도 OK)
                 if (qJong == 0)
@@ -104,7 +102,7 @@ namespace NoxyTools.Wpf.Utils
             int offset = c - SyllableBase;
             jong = offset % JongCount;
             jung = (offset / JongCount) % JungCount;
-            cho  = offset / (JongCount * JungCount);
+            cho = offset / (JongCount * JungCount);
         }
 
         private static int GetSyllableChosungIndex(char c)

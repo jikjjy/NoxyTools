@@ -1,5 +1,4 @@
 ﻿using Gen.Utils;
-using System;
 using System.Drawing;
 
 namespace SaveParser

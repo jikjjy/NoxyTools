@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-
-namespace NoxypediaEditor.Model
+﻿namespace NoxypediaEditor.Model
 {
     public class ConfigItemEditorSet
     {

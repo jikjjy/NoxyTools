@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 
 namespace SaveParser
 {
     internal static class ItemGrade
     {
         public static IReadOnlyDictionary<Color, EItemGrade> Grades => mItemGrades;
-        private static readonly Dictionary<Color, EItemGrade> mItemGrades = new Dictionary<Color, EItemGrade>()
+        private static readonly Dictionary<Color, EItemGrade> mItemGrades = new()
         {
             [Color.Empty] = EItemGrade.보조,
             [Color.FromArgb(0, 0, 64, 128)] = EItemGrade.보조,
@@ -24,6 +23,7 @@ namespace SaveParser
             [Color.FromArgb(255, 255, 255, 164)] = EItemGrade.프렉탈_렐릭,
             [Color.FromArgb(255, 113, 109, 96)] = EItemGrade.베니타테,
             [Color.FromArgb(0xFF, 0xD2, 0xD2, 0x00)] = EItemGrade.스텔라,
+            //[Color.FromArgb(0xFF, 0xAA, 0xFF, 0xAA)] = EItemGrade.Xtal,
         };
     }
 }

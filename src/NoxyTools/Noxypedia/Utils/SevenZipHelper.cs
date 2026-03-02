@@ -1,10 +1,6 @@
 // 7Zip helper code by Peter Bromberg
 // http://www.eggheadcafe.com/tutorials/aspnet/064b41e4-60bc-4d35-9136-368603bcc27a/7zip-lzma-inmemory-com.aspx
 
-using System;
-using System.IO;
-
-
 namespace SevenZip.Compression.LZMA
 {
     public static class SevenZipHelper

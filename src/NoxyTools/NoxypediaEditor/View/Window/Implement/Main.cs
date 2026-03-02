@@ -1,10 +1,7 @@
 ﻿using Noxypedia;
 using Noxypedia.Utils;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using System.Windows.Forms;
 
 namespace NoxypediaEditor
 {
@@ -64,7 +61,7 @@ namespace NoxypediaEditor
             btnSelectCraftRecipe.Click += btnSelect_Click;
 
             btnDownload.Click += btnDownload_Click;
-            btnExport.Click   += btnExport_Click;
+            btnExport.Click += btnExport_Click;
 
             chkTopMost.CheckedChanged += chkTopMost_CheckedChanged;
 
@@ -238,9 +235,9 @@ namespace NoxypediaEditor
 
             using var sfd = new SaveFileDialog
             {
-                Title      = "noxypedia.dat 내보내기 위치 선택",
-                FileName   = "noxypedia.dat",
-                Filter     = "Noxypedia 데이터 파일 (*.dat)|*.dat",
+                Title = "noxypedia.dat 내보내기 위치 선택",
+                FileName = "noxypedia.dat",
+                Filter = "Noxypedia 데이터 파일 (*.dat)|*.dat",
                 DefaultExt = "dat"
             };
 

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Noxypedia.Model
+﻿namespace Noxypedia.Model
 {
     [Serializable]
     public class LocationSet : BaseModel

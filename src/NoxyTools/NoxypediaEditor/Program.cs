@@ -1,7 +1,4 @@
-﻿using System.Threading;
-using System.Windows.Forms;
-
-namespace NoxypediaEditor
+﻿namespace NoxypediaEditor
 {
     static class Program
     {

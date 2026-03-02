@@ -1,4 +1,3 @@
-using System.Threading;
 using System.Windows.Media.Imaging;
 
 namespace NoxyTools.Core.Model

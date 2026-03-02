@@ -1,5 +1,4 @@
 using Noxypedia.Model;
-using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
@@ -59,9 +58,9 @@ namespace NoxyTools.Wpf.Converters
             if (delta > 1e-9)
             {
                 s = delta / (1.0 - Math.Abs(2.0 * l - 1.0));
-                if (max == rf)      h = 60.0 * (((gf - bf) / delta) % 6.0);
+                if (max == rf) h = 60.0 * (((gf - bf) / delta) % 6.0);
                 else if (max == gf) h = 60.0 * ((bf - rf) / delta + 2.0);
-                else                h = 60.0 * ((rf - gf) / delta + 4.0);
+                else h = 60.0 * ((rf - gf) / delta + 4.0);
                 if (h < 0) h += 360.0;
             }
             return (h, s, l);
@@ -73,12 +72,12 @@ namespace NoxyTools.Wpf.Converters
             double x = c * (1.0 - Math.Abs((h / 60.0) % 2.0 - 1.0));
             double m = l - c / 2.0;
             double rf, gf, bf;
-            if      (h < 60)  { rf = c; gf = x; bf = 0; }
+            if (h < 60) { rf = c; gf = x; bf = 0; }
             else if (h < 120) { rf = x; gf = c; bf = 0; }
             else if (h < 180) { rf = 0; gf = c; bf = x; }
             else if (h < 240) { rf = 0; gf = x; bf = c; }
             else if (h < 300) { rf = x; gf = 0; bf = c; }
-            else              { rf = c; gf = 0; bf = x; }
+            else { rf = c; gf = 0; bf = x; }
             return (
                 (byte)Math.Round((rf + m) * 255),
                 (byte)Math.Round((gf + m) * 255),

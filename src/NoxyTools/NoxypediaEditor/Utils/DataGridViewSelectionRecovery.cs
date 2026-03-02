@@ -1,7 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
-
-namespace NoxypediaEditor
+﻿namespace NoxypediaEditor
 {
     public static partial class Utils
     {

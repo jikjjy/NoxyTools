@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Noxypedia.Model
+﻿namespace Noxypedia.Model
 {
     // DynamoDB 의존성 제거 — 히스토리 이력은 더 이상 사용하지 않음
     public class NoxypediaHistory

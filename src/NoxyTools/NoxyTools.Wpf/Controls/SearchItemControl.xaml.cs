@@ -1,6 +1,5 @@
-using System.Windows;
-using System.Windows.Controls;
 using NoxyTools.Wpf.ViewModels;
+using System.Windows.Controls;
 
 namespace NoxyTools.Wpf.Controls
 {

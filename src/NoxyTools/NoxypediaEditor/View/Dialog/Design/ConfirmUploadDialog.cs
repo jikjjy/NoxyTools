@@ -1,6 +1,4 @@
-﻿using System.Windows.Forms;
-
-namespace NoxypediaEditor
+﻿namespace NoxypediaEditor
 {
     public partial class ConfirmUploadDialog : Form
     {
