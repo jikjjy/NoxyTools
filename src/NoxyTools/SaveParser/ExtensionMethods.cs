@@ -145,22 +145,41 @@ namespace SaveParser
                 return;
             }
 
+            if (itemGradeStartIndex + 10 > content.Length)
+            {
+                return;
+            }
+
             int color = Convert.ToInt32(content.Substring(itemGradeStartIndex + 2, 8), 16);
             ItemSet item = new ItemSet();
             item.GradeColor = Color.FromArgb(color);
 
             content = content.Replace(content.Substring(0, itemGradeStartIndex + 10), string.Empty);
+
+            int lastQuoteIndex = content.LastIndexOf("'");
+            if (lastQuoteIndex < 0)
+            {
+                return;
+            }
             item.Name = content
-                .Substring(0, content.LastIndexOf("'"))
+                .Substring(0, lastQuoteIndex)
                 .Replace("[보조]", string.Empty)
                 .Trim();
 
             int chargesIndex = content.IndexOf("Charges: ");
+            if (chargesIndex < 0)
+            {
+                return;
+            }
             content = content
                 .Substring(chargesIndex, content.Length - chargesIndex)
                 .Replace("Charges: ", string.Empty)
                 .Trim();
-            item.Charge = Convert.ToInt32(content);
+            if (!int.TryParse(content, out int charge))
+            {
+                return;
+            }
+            item.Charge = charge;
 
             data.Items.Add(item);
         }

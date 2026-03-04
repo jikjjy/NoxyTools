@@ -175,6 +175,12 @@ public partial class MakeValidReportViewModel : ViewModelBase
             UpdateElapsedText();
             PreviewDocument = _statistics.ExportToFlowDocument(_config);
         }
+        catch (Exception ex)
+        {
+            _dialog.ShowMessageBox(
+                $"새로고침 중 오류가 발생했습니다.\n\n{ex.Message}",
+                "새로고침 오류");
+        }
         finally
         {
             IsRefreshing = false;
