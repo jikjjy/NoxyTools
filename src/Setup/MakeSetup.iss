@@ -45,6 +45,7 @@ Source: "..\publish\NoxyTools\Resources\noxypedia.dat"; DestDir: "{app}\Resource
 Source: "..\NoxyTools\NoxyTools.Wpf\bin\Release\net8.0-windows\win-x64\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\NoxyTools\NoxyTools.Wpf\bin\Release\net8.0-windows\win-x64\publish\Resources\noxypedia.dat"; DestDir: "{app}\Resources"; Flags: ignoreversion skipifsourcedoesntexist
 #endif
+Source: "..\..\CHANGELOG.md"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
