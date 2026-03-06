@@ -4,7 +4,11 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.0.0/)를 따르며,  
 버전 규칙은 [Semantic Versioning](https://semver.org/lang/ko/)을 따릅니다.
 
-## [Unreleased]
+## [0.2.6] - 2026-03-xx
+
+### 수정
+- 데이터베이스 업데이트
+    - [프렉탈-레어] 시미터 프롬 딥헬 조합 재료 수정. @코시님 제보 감사합니다.
 
 ## [0.2.5] - 2026-03-05
 

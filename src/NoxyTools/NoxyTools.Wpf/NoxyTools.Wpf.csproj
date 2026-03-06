@@ -6,7 +6,7 @@
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>0.2.4</Version>
+    <Version>0.2.6</Version>
     <RootNamespace>NoxyTools.Wpf</RootNamespace>
     <AssemblyName>NoxyToolsWpf</AssemblyName>
     <ApplicationIcon>free-icon-video-game-3571528.ico</ApplicationIcon>
