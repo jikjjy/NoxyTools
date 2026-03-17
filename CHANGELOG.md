@@ -4,7 +4,15 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.0.0/)를 따르며,  
 버전 규칙은 [Semantic Versioning](https://semver.org/lang/ko/)을 따릅니다.
 
-## [0.2.10] - 2026-03-15 (Unreleased)
+## [0.2.11] - 2026-03-17 (Unreleased)
+
+### 수정
+- NoxyTool 업데이트
+    - `아이템 인증 도우미` 탭
+        - 인증자 리스트 게시글 링크 추가(https://cafe.naver.com/noxy/30456)
+        - 아이템 조합 리스트 게시글 링크 추가(https://cafe.naver.com/noxy/29122)
+
+## [0.2.10] - 2026-03-15
 
 ### 수정
 - 데이터베이스 업데이트
