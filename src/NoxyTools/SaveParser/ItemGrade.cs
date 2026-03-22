@@ -23,7 +23,7 @@ namespace SaveParser
             [Color.FromArgb(255, 255, 255, 164)] = EItemGrade.프렉탈_렐릭,
             [Color.FromArgb(255, 113, 109, 96)] = EItemGrade.베니타테,
             [Color.FromArgb(0xFF, 0xD2, 0xD2, 0x00)] = EItemGrade.스텔라,
-            //[Color.FromArgb(0xFF, 0xAA, 0xFF, 0xAA)] = EItemGrade.Xtal,
+            [Color.FromArgb(0xFF, 0xAA, 0xFF, 0xAA)] = EItemGrade.크리스탈,
         };
     }
 }

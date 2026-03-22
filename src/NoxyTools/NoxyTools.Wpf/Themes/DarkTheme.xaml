@@ -81,6 +81,8 @@
     <SolidColorBrush x:Key="GradeVenitateBrush"          Color="#FF716D60"/>
     <!-- 스텔라 -->
     <SolidColorBrush x:Key="GradeStellaBrush"            Color="#FFD2D200"/>
+    <!-- 크리스탈 -->
+    <SolidColorBrush x:Key="GradeCrystalBrush"           Color="#FFAAFFAA"/>
     <!-- 상위 에픽 -->
     <SolidColorBrush x:Key="GradeHighEpicBrush"          Color="#FFFED169"/>
 
