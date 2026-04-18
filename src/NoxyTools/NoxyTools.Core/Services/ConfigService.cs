@@ -59,6 +59,18 @@ namespace NoxyTools.Core.Services
                 mRegistary.SetValue($"{nameof(NoxypediaDataVersion)}", value);
             }
         }
+        /// <summary>마지막으로 동기화된 구글 시트 조합법 버전 (A1 셀 값)</summary>
+        public string GoogleSheetCraftRecipeVersion
+        {
+            get => mRegistary.GetValue(nameof(GoogleSheetCraftRecipeVersion), string.Empty)?.ToString() ?? string.Empty;
+            set => mRegistary.SetValue(nameof(GoogleSheetCraftRecipeVersion), value);
+        }
+        /// <summary>마지막으로 구글 시트 동기화를 수행한 시점의 앱 버전</summary>
+        public string GoogleSheetLastSyncAppVersion
+        {
+            get => mRegistary.GetValue(nameof(GoogleSheetLastSyncAppVersion), string.Empty)?.ToString() ?? string.Empty;
+            set => mRegistary.SetValue(nameof(GoogleSheetLastSyncAppVersion), value);
+        }
         public int DataIndex
         {
             get

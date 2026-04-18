@@ -492,6 +492,15 @@ namespace Noxypedia
             return index >= 0;
         }
 
+        /// <summary>
+        /// 모든 데이터 간의 참조 관계를 다시 구성합니다.
+        /// Google Sheet 동기화 등 외부에서 데이터를 일괄 변경한 후 호출하세요.
+        /// </summary>
+        public static void RebuildDataRelations(this NoxypediaSet src)
+        {
+            LinkingDataRelation(src);
+        }
+
         private static void LinkingDataRelation(NoxypediaSet src)
         {
             Console.WriteLine($"[B] LinkingDataRelation");

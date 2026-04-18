@@ -50,6 +50,14 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isItemSimulatorSelected;
 
+    /// <summary>구글 시트에 업데이트된 조합법 레시피가 있을 때 true</summary>
+    [ObservableProperty]
+    private bool _isCraftRecipeUpdateAvailable;
+
+    /// <summary>마지막으로 동기화된 조합법 DB 버전 (구글 시트 A1 값)</summary>
+    [ObservableProperty]
+    private string _craftRecipeDbVersion = string.Empty;
+
     public MainViewModel(
         INavigationService navigation,
         CacheService cache,
@@ -69,6 +77,8 @@ public partial class MainViewModel : ViewModelBase
 
         var ver = Assembly.GetEntryAssembly()?.GetName().Version;
         AppVersion = ver is not null ? $"v{ver.Major}.{ver.Minor}.{ver.Build}" : "v?.?.?";
+
+        CraftRecipeDbVersion = _config.GoogleSheetCraftRecipeVersion;
 
         // 초기 화면: 아이템 인증 도우미
         SelectMakeValidReport();
@@ -90,6 +100,19 @@ public partial class MainViewModel : ViewModelBase
             _noxypediaSearchVm.OnDataLoaded();
             _itemSimulatorVm.OnDataLoaded();
             StopLoading("DB 로드 완료");
+
+            // 최초 실행이거나 앱이 업데이트된 경우 → 자동 동기화
+            bool isFirstRun  = string.IsNullOrEmpty(_config.GoogleSheetCraftRecipeVersion);
+            bool isAppUpdated = AppVersion != _config.GoogleSheetLastSyncAppVersion;
+            if (isFirstRun || isAppUpdated)
+            {
+                await autoSyncCraftRecipesAsync();
+            }
+            else
+            {
+                // 그 외에는 원격 버전만 확인해 배지 표시
+                _ = checkCraftRecipeUpdateAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -233,6 +256,71 @@ public partial class MainViewModel : ViewModelBase
         if (IsMakeValidReportSelected) SelectMakeValidReport();
         else if (IsNoxypediaSearchSelected) SelectNoxypediaSearch();
         else if (IsItemSimulatorSelected) SelectItemSimulator();
+    }
+
+    // --- 구글 시트 조합법 동기화 ---
+
+    private async Task autoSyncCraftRecipesAsync()
+    {
+        StartLoading("조합법 자동 동기화 중");
+        try
+        {
+            var (synced, added, sheetVersion) = await _cache.SyncCraftRecipesFromGoogleSheetAsync();
+            saveSyncResult(sheetVersion);
+            _noxypediaSearchVm.RefreshData();
+            StopLoading($"조합법 자동 동기화 완료 (업데이트 {synced}개, 신규 {added}개)");
+        }
+        catch (Exception ex)
+        {
+            StopLoading($"자동 동기화 실패: {ex.Message}");
+            _ = checkCraftRecipeUpdateAsync();
+        }
+    }
+
+    private async Task checkCraftRecipeUpdateAsync()
+    {
+        try
+        {
+            string remoteVersion = await _cache.FetchCraftRecipeSheetVersionAsync();
+            if (!string.IsNullOrEmpty(remoteVersion)
+                && remoteVersion != _config.GoogleSheetCraftRecipeVersion)
+            {
+                IsCraftRecipeUpdateAvailable = true;
+            }
+        }
+        catch
+        {
+            // 네트워크 오류는 무시
+        }
+    }
+
+    [RelayCommand]
+    private async Task SyncCraftRecipesFromGoogleSheetAsync()
+    {
+        if (IsLoading) return;
+        StartLoading("조합법 동기화 중");
+        try
+        {
+            var (synced, added, sheetVersion) = await _cache.SyncCraftRecipesFromGoogleSheetAsync();
+            saveSyncResult(sheetVersion);
+            _noxypediaSearchVm.RefreshData();
+            StopLoading($"조합법 동기화 완료 (업데이트 {synced}개, 신규 {added}개)");
+        }
+        catch (Exception ex)
+        {
+            StopLoading($"동기화 실패: {ex.Message}");
+        }
+    }
+
+    private void saveSyncResult(string sheetVersion)
+    {
+        if (!string.IsNullOrEmpty(sheetVersion))
+        {
+            _config.GoogleSheetCraftRecipeVersion = sheetVersion;
+            _config.GoogleSheetLastSyncAppVersion = AppVersion;
+            CraftRecipeDbVersion = sheetVersion;
+        }
+        IsCraftRecipeUpdateAvailable = false;
     }
 
     // --- 업데이트 확인 ---

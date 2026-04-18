@@ -79,13 +79,25 @@
                            Margin="12,0"/>
 
                 <!-- 버전 표시 (우측 정렬) -->
-                <TextBlock DockPanel.Dock="Right"
-                           Text="{Binding AppVersion}"
-                           Foreground="{StaticResource SecondaryTextBrush}"
-                           FontSize="11"
-                           VerticalAlignment="Center"
-                           Margin="8,0"
-                           WindowChrome.IsHitTestVisibleInChrome="True"/>
+                <StackPanel DockPanel.Dock="Right"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="8,0"
+                            WindowChrome.IsHitTestVisibleInChrome="True">
+                    <TextBlock Text="DB "
+                               Foreground="{StaticResource SecondaryTextBrush}"
+                               FontSize="11"/>
+                    <TextBlock Text="{Binding CraftRecipeDbVersion, FallbackValue='-'}"
+                               Foreground="{StaticResource SecondaryTextBrush}"
+                               FontSize="11"
+                               ToolTip="마지막으로 동기화된 조합법 DB 버전"/>
+                    <TextBlock Text=" | "
+                               Foreground="{StaticResource SecondaryTextBrush}"
+                               FontSize="11"/>
+                    <TextBlock Text="{Binding AppVersion}"
+                               Foreground="{StaticResource SecondaryTextBrush}"
+                               FontSize="11"/>
+                </StackPanel>
 
                 <!-- 설정 백업 / 복구 / 업데이트 버튼 (우측 정렬) -->
                 <StackPanel DockPanel.Dock="Right"
@@ -106,7 +118,20 @@
                     <Button Content="🔔 업데이트"
                             Command="{Binding CheckForUpdateManualCommand}"
                             ToolTip="최신 버전을 확인합니다"
-                            FontSize="11"/>
+                            FontSize="11"
+                            Margin="0,0,3,0"/>
+                    <Button Command="{Binding SyncCraftRecipesFromGoogleSheetCommand}"
+                            ToolTip="구글 시트에서 최신 조합법 레시피를 내려받아 적용합니다"
+                            FontSize="11">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🔄 조합법 동기화" VerticalAlignment="Center"/>
+                            <Ellipse Width="7" Height="7"
+                                     Fill="OrangeRed"
+                                     VerticalAlignment="Top"
+                                     Margin="3,1,0,0"
+                                     Visibility="{Binding IsCraftRecipeUpdateAvailable, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
 
                 <!-- 탭 버튼 -->

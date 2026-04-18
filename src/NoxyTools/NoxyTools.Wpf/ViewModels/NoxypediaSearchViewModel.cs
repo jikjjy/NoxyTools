@@ -146,6 +146,16 @@ public partial class NoxypediaSearchViewModel : ViewModelBase
         InitializeItems();
     }
 
+    /// <summary>
+    /// 외부에서 <see cref="NoxypediaSet"/> 데이터가 갱신된 후 검색 목록을 다시 구성합니다.
+    /// Google Sheet 동기화 완료 후 MainViewModel에서 호출합니다.
+    /// </summary>
+    public void RefreshData()
+    {
+        _initialized = false;
+        InitializeItems();
+    }
+
     private void InitializeItems()
     {
         if (_cache.NoxypediaData == null) return;

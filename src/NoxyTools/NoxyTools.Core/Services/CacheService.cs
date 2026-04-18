@@ -196,6 +196,28 @@ namespace NoxyTools.Core.Services
             }
         }
 
+        /// <summary>
+        /// 구글 시트에서 조합법 레시피 정보를 내려받아 현재 <see cref="NoxypediaData"/>에 반영합니다.
+        /// </summary>
+        /// <returns>(업데이트된 레시피 수, 새로 추가된 레시피 수, 시트 버전 문자열)</returns>
+        public async Task<(int synced, int added, string sheetVersion)> SyncCraftRecipesFromGoogleSheetAsync()
+        {
+            if (NoxypediaData == null)
+                throw new InvalidOperationException("Noxypedia 데이터가 로드되지 않았습니다. LoadNoxypediaData()를 먼저 호출하세요.");
+
+            var service = new Noxypedia.Utils.GoogleSheetCraftRecipeSyncService();
+            return await service.SyncAsync(NoxypediaData);
+        }
+
+        /// <summary>
+        /// 데이터를 다운로드하지 않고 구글 시트 A1의 버전 문자열만 가져옵니다.
+        /// </summary>
+        public async Task<string> FetchCraftRecipeSheetVersionAsync()
+        {
+            var service = new Noxypedia.Utils.GoogleSheetCraftRecipeSyncService();
+            return await service.FetchSheetVersionAsync();
+        }
+
         private static string createMD5(string input)
         {
             using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
