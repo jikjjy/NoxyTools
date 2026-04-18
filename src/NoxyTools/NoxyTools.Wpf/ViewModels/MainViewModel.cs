@@ -102,7 +102,8 @@ public partial class MainViewModel : ViewModelBase
             StopLoading("DB 로드 완료");
 
             // 최초 실행이거나 앱이 업데이트된 경우 → 자동 동기화
-            bool isFirstRun  = string.IsNullOrEmpty(_config.GoogleSheetCraftRecipeVersion);
+            bool isFirstRun   = string.IsNullOrEmpty(_config.GoogleSheetCraftRecipeVersion)
+                             || string.IsNullOrEmpty(_config.GoogleSheetDropTableVersion);
             bool isAppUpdated = AppVersion != _config.GoogleSheetLastSyncAppVersion;
             if (isFirstRun || isAppUpdated)
             {
@@ -258,17 +259,18 @@ public partial class MainViewModel : ViewModelBase
         else if (IsItemSimulatorSelected) SelectItemSimulator();
     }
 
-    // --- 구글 시트 조합법 동기화 ---
+    // --- 구글 시트 동기화 (조합법 + 드랍 테이블) ---
 
     private async Task autoSyncCraftRecipesAsync()
     {
-        StartLoading("조합법 자동 동기화 중");
+        StartLoading("구글 시트 자동 동기화 중");
         try
         {
-            var (synced, added, sheetVersion) = await _cache.SyncCraftRecipesFromGoogleSheetAsync();
-            saveSyncResult(sheetVersion);
+            var (craftSynced, craftAdded, craftVer) = await _cache.SyncCraftRecipesFromGoogleSheetAsync();
+            var (dropSynced, dropAdded, dropVer)    = await _cache.SyncDropTableFromGoogleSheetAsync();
+            saveSyncResult(craftVer, dropVer);
             _noxypediaSearchVm.RefreshData();
-            StopLoading($"조합법 자동 동기화 완료 (업데이트 {synced}개, 신규 {added}개)");
+            StopLoading($"자동 동기화 완료 (조합법 {craftSynced + craftAdded}개, 드랍 {dropSynced + dropAdded}개)");
         }
         catch (Exception ex)
         {
@@ -281,12 +283,17 @@ public partial class MainViewModel : ViewModelBase
     {
         try
         {
-            string remoteVersion = await _cache.FetchCraftRecipeSheetVersionAsync();
-            if (!string.IsNullOrEmpty(remoteVersion)
-                && remoteVersion != _config.GoogleSheetCraftRecipeVersion)
-            {
+            var craftVersionTask = _cache.FetchCraftRecipeSheetVersionAsync();
+            var dropVersionTask  = _cache.FetchDropTableSheetVersionAsync();
+            await Task.WhenAll(craftVersionTask, dropVersionTask);
+
+            bool craftUpdated = !string.IsNullOrEmpty(craftVersionTask.Result)
+                                && craftVersionTask.Result != _config.GoogleSheetCraftRecipeVersion;
+            bool dropUpdated  = !string.IsNullOrEmpty(dropVersionTask.Result)
+                                && dropVersionTask.Result != _config.GoogleSheetDropTableVersion;
+
+            if (craftUpdated || dropUpdated)
                 IsCraftRecipeUpdateAvailable = true;
-            }
         }
         catch
         {
@@ -298,13 +305,14 @@ public partial class MainViewModel : ViewModelBase
     private async Task SyncCraftRecipesFromGoogleSheetAsync()
     {
         if (IsLoading) return;
-        StartLoading("조합법 동기화 중");
+        StartLoading("구글 시트 동기화 중");
         try
         {
-            var (synced, added, sheetVersion) = await _cache.SyncCraftRecipesFromGoogleSheetAsync();
-            saveSyncResult(sheetVersion);
+            var (craftSynced, craftAdded, craftVer) = await _cache.SyncCraftRecipesFromGoogleSheetAsync();
+            var (dropSynced, dropAdded, dropVer)    = await _cache.SyncDropTableFromGoogleSheetAsync();
+            saveSyncResult(craftVer, dropVer);
             _noxypediaSearchVm.RefreshData();
-            StopLoading($"조합법 동기화 완료 (업데이트 {synced}개, 신규 {added}개)");
+            StopLoading($"동기화 완료 (조합법 {craftSynced + craftAdded}개, 드랍 {dropSynced + dropAdded}개)");
         }
         catch (Exception ex)
         {
@@ -312,14 +320,17 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 
-    private void saveSyncResult(string sheetVersion)
+    private void saveSyncResult(string craftVersion, string dropVersion)
     {
-        if (!string.IsNullOrEmpty(sheetVersion))
+        if (!string.IsNullOrEmpty(craftVersion))
         {
-            _config.GoogleSheetCraftRecipeVersion = sheetVersion;
-            _config.GoogleSheetLastSyncAppVersion = AppVersion;
-            CraftRecipeDbVersion = sheetVersion;
+            _config.GoogleSheetCraftRecipeVersion = craftVersion;
+            CraftRecipeDbVersion = craftVersion;
         }
+        if (!string.IsNullOrEmpty(dropVersion))
+            _config.GoogleSheetDropTableVersion = dropVersion;
+
+        _config.GoogleSheetLastSyncAppVersion = AppVersion;
         IsCraftRecipeUpdateAvailable = false;
     }
 

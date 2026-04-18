@@ -65,6 +65,12 @@ namespace NoxyTools.Core.Services
             get => mRegistary.GetValue(nameof(GoogleSheetCraftRecipeVersion), string.Empty)?.ToString() ?? string.Empty;
             set => mRegistary.SetValue(nameof(GoogleSheetCraftRecipeVersion), value);
         }
+        /// <summary>마지막으로 동기화된 구글 시트 드랍 테이블 버전 (B1 셀 값)</summary>
+        public string GoogleSheetDropTableVersion
+        {
+            get => mRegistary.GetValue(nameof(GoogleSheetDropTableVersion), string.Empty)?.ToString() ?? string.Empty;
+            set => mRegistary.SetValue(nameof(GoogleSheetDropTableVersion), value);
+        }
         /// <summary>마지막으로 구글 시트 동기화를 수행한 시점의 앱 버전</summary>
         public string GoogleSheetLastSyncAppVersion
         {

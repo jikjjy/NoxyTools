@@ -121,10 +121,10 @@
                             FontSize="11"
                             Margin="0,0,3,0"/>
                     <Button Command="{Binding SyncCraftRecipesFromGoogleSheetCommand}"
-                            ToolTip="구글 시트에서 최신 조합법 레시피를 내려받아 적용합니다"
+                            ToolTip="구글 시트에서 최신 정보를 내려받아 적용합니다"
                             FontSize="11">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🔄 조합법 동기화" VerticalAlignment="Center"/>
+                            <TextBlock Text="🔄 구글 시트 동기화" VerticalAlignment="Center"/>
                             <Ellipse Width="7" Height="7"
                                      Fill="OrangeRed"
                                      VerticalAlignment="Top"

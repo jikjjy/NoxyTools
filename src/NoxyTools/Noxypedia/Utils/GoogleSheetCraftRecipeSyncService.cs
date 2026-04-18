@@ -50,23 +50,25 @@ namespace Noxypedia.Utils
         /// <summary>
         /// 구글 시트 CSV를 다운로드하여 <paramref name="data"/>에 반영합니다.
         /// </summary>
-        /// <returns>(업데이트된 레시피 수, 새로 추가된 레시피 수, 시트 버전 문자열)</returns>
-        public async Task<(int synced, int added, string sheetVersion)> SyncAsync(NoxypediaSet data)
+        /// <returns>(업데이트된 레시피 수, 새로 추가된 레시피 수, 시트 버전 문자열, 스킵된 재료 로그)</returns>
+        public async Task<(int synced, int added, string sheetVersion, IReadOnlyList<string> skipLog)> SyncAsync(NoxypediaSet data)
         {
             string csv = await _httpClient.GetStringAsync(SHEET_EXPORT_URL);
             string sheetVersion = ParseSheetVersion(csv);
-            var (synced, added) = ApplyCsv(data, csv);
-            return (synced, added, sheetVersion);
+            var (synced, added, skipLog) = ApplyCsv(data, csv);
+            return (synced, added, sheetVersion, skipLog);
         }
 
         /// <summary>
         /// 이미 다운로드한 CSV 문자열을 파싱하여 <paramref name="data"/>에 반영합니다.
         /// </summary>
-        public (int synced, int added) ApplyCsv(NoxypediaSet data, string csv)
+        /// <returns>(업데이트된 레시피 수, 새로 추가된 레시피 수, 스킵된 재료 로그)</returns>
+        public (int synced, int added, IReadOnlyList<string> skipLog) ApplyCsv(NoxypediaSet data, string csv)
         {
-            var lines = SplitCsvLines(csv);
-            int synced = 0;
-            int added  = 0;
+            var lines   = SplitCsvLines(csv);
+            int synced  = 0;
+            int added   = 0;
+            var skipLog = new List<string>();
 
             for (int i = HEADER_ROWS; i < lines.Count; i++)
             {
@@ -76,6 +78,8 @@ namespace Noxypedia.Utils
 
                 string baseItemName   = cols[COL_BASE_ITEM].Trim();
                 if (string.IsNullOrWhiteSpace(baseItemName)) continue;
+
+                int sheetRow = i + 1; // 1-based 행 번호
 
                 string locationName   = COL_LOCATION < cols.Length    ? cols[COL_LOCATION].Trim()    : string.Empty;
                 string successProbRaw = COL_SUCCESS_PROB < cols.Length ? cols[COL_SUCCESS_PROB].Trim(): string.Empty;
@@ -97,18 +101,25 @@ namespace Noxypedia.Utils
                     if (matRaw.IndexOf(" or ", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         var altNames = matRaw.Split(new[] { " or " }, StringSplitOptions.RemoveEmptyEntries);
-                        var altGroup = altNames
-                            .Select(n => FindOrCreateItem(data, n.Trim()))
-                            .Where(item => item != null)
-                            .ToList();
+                        var altGroup = new List<ItemSet>();
+                        foreach (var altName in altNames)
+                        {
+                            var altItem = FindOrCreateItem(data, altName.Trim());
+                            if (altItem != null)
+                                altGroup.Add(altItem);
+                            else
+                                skipLog.Add($"[행 {sheetRow}] {baseItemName}: '{altName.Trim()}' (or 대체 재료)");
+                        }
                         if (altGroup.Count > 0)
-                            substituteMaterials.Add(altGroup!);
+                            substituteMaterials.Add(altGroup);
                     }
                     else
                     {
                         var matItem = FindOrCreateItem(data, matRaw);
                         if (matItem != null)
                             materials.Add(matItem);
+                        else
+                            skipLog.Add($"[행 {sheetRow}] {baseItemName}: '{matRaw}'");
                     }
                 }
 
@@ -156,7 +167,7 @@ namespace Noxypedia.Utils
             // 전체 참조 관계 재구성
             data.RebuildDataRelations();
 
-            return (synced, added);
+            return (synced, added, skipLog);
         }
 
         // ── 내부 헬퍼 ────────────────────────────────────────────────────────

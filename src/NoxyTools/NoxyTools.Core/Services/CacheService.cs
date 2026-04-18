@@ -3,6 +3,7 @@ using Noxypedia.Utils;
 using NoxyTools.Core.Model;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -24,6 +25,8 @@ namespace NoxyTools.Core.Services
         private readonly string mBasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), @"Noxy Tools", @"cache");
         private readonly string mClipImagePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), @"Noxy Tools", @"cache", @"cilpImage");
         private string mNoxypediaCacheFile => Path.Combine(mBasePath, @"noxypedia_rawdata.cache");
+        private string mDropTableSkipLogFile  => Path.Combine(mBasePath, @"drop_table_skip.log");
+        private string mCraftRecipeSkipLogFile => Path.Combine(mBasePath, @"craft_recipe_skip.log");
 
         public void LoadNoxypediaData(ConfigService config, string datFilePath)
         {
@@ -198,6 +201,7 @@ namespace NoxyTools.Core.Services
 
         /// <summary>
         /// 구글 시트에서 조합법 레시피 정보를 내려받아 현재 <see cref="NoxypediaData"/>에 반영합니다.
+        /// 등록되지 않은 재료명은 <c>craft_recipe_skip.log</c> 파일에 기록됩니다.
         /// </summary>
         /// <returns>(업데이트된 레시피 수, 새로 추가된 레시피 수, 시트 버전 문자열)</returns>
         public async Task<(int synced, int added, string sheetVersion)> SyncCraftRecipesFromGoogleSheetAsync()
@@ -206,17 +210,75 @@ namespace NoxyTools.Core.Services
                 throw new InvalidOperationException("Noxypedia 데이터가 로드되지 않았습니다. LoadNoxypediaData()를 먼저 호출하세요.");
 
             var service = new Noxypedia.Utils.GoogleSheetCraftRecipeSyncService();
-            return await service.SyncAsync(NoxypediaData);
+            var (synced, added, sheetVersion, skipLog) = await service.SyncAsync(NoxypediaData);
+
+            writeCraftRecipeSkipLog(skipLog);
+
+            return (synced, added, sheetVersion);
         }
 
         /// <summary>
-        /// 데이터를 다운로드하지 않고 구글 시트 A1의 버전 문자열만 가져옵니다.
+        /// 데이터를 다운로드하지 않고 구글 시트 조합법 A1의 버전 문자열만 가져옵니다.
         /// </summary>
         public async Task<string> FetchCraftRecipeSheetVersionAsync()
         {
             var service = new Noxypedia.Utils.GoogleSheetCraftRecipeSyncService();
             return await service.FetchSheetVersionAsync();
         }
+
+        /// <summary>
+        /// 구글 시트에서 드랍 테이블 정보를 내려받아 현재 <see cref="NoxypediaData"/>에 반영합니다.
+        /// 등록되지 않은 아이템명은 <c>drop_table_skip.log</c> 파일에 기록됩니다.
+        /// </summary>
+        /// <returns>(업데이트된 몬스터 수, 새로 추가된 몬스터 수, 시트 버전 문자열)</returns>
+        public async Task<(int synced, int added, string sheetVersion)> SyncDropTableFromGoogleSheetAsync()
+        {
+            if (NoxypediaData == null)
+                throw new InvalidOperationException("Noxypedia 데이터가 로드되지 않았습니다. LoadNoxypediaData()를 먼저 호출하세요.");
+
+            var service = new Noxypedia.Utils.GoogleSheetDropTableSyncService();
+            var (synced, added, sheetVersion, skipLog) = await service.SyncAsync(NoxypediaData);
+
+            writeDropTableSkipLog(skipLog);
+
+            return (synced, added, sheetVersion);
+        }
+
+        /// <summary>
+        /// 데이터를 다운로드하지 않고 구글 시트 드랍 테이블 B1의 버전 문자열만 가져옵니다.
+        /// </summary>
+        public async Task<string> FetchDropTableSheetVersionAsync()
+        {
+            var service = new Noxypedia.Utils.GoogleSheetDropTableSyncService();
+            return await service.FetchSheetVersionAsync();
+        }
+
+        private void writeSkipLog(string filePath, string title, IReadOnlyList<string> skipLog)
+        {
+            try
+            {
+                checkDirectory(mBasePath);
+                using var writer = new StreamWriter(filePath, append: false, encoding: Encoding.UTF8);
+                writer.WriteLine($"{title} — {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                writer.WriteLine($"총 {skipLog.Count}개 항목이 스킵되었습니다. (로컬 DB에 등록되지 않은 아이템)");
+                writer.WriteLine(new string('-', 60));
+                if (skipLog.Count == 0)
+                    writer.WriteLine("스킵된 항목 없음.");
+                else
+                    foreach (var entry in skipLog)
+                        writer.WriteLine(entry);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CacheService] 스킵 로그 저장 실패 ({filePath}): {ex.Message}");
+            }
+        }
+
+        private void writeDropTableSkipLog(IReadOnlyList<string> skipLog)
+            => writeSkipLog(mDropTableSkipLogFile, "드랍 테이블 동기화 스킵 로그", skipLog);
+
+        private void writeCraftRecipeSkipLog(IReadOnlyList<string> skipLog)
+            => writeSkipLog(mCraftRecipeSkipLogFile, "조합법 동기화 스킵 로그", skipLog);
 
         private static string createMD5(string input)
         {
