@@ -51,42 +51,6 @@
     <SolidColorBrush x:Key="MenuBarBackgroundBrush"      Color="#FF2D2D30"/>
 
     <!-- ========================================================= -->
-    <!--  아이템 등급 색상                                           -->
-    <!-- ========================================================= -->
-    <!-- 보조 / 기본 -->
-    <SolidColorBrush x:Key="GradeDefaultBrush"           Color="#FFB0B0B0"/>
-    <!-- 오메가 -->
-    <SolidColorBrush x:Key="GradeOmegaBrush"             Color="#FFFF0000"/>
-    <!-- 렐릭 -->
-    <SolidColorBrush x:Key="GradeRelicBrush"             Color="#FFFFCC00"/>
-    <!-- 차원 -->
-    <SolidColorBrush x:Key="GradeDimensionBrush"         Color="#FF0080FF"/>
-    <!-- 포가튼 -->
-    <SolidColorBrush x:Key="GradeForgottenBrush"         Color="#FF7777AA"/>
-    <!-- 상위 차원 -->
-    <SolidColorBrush x:Key="GradeHighDimensionBrush"     Color="#FF5AF5B4"/>
-    <!-- 언노운 -->
-    <SolidColorBrush x:Key="GradeUnknownBrush"           Color="#FFB94652"/>
-    <!-- 라브리 -->
-    <SolidColorBrush x:Key="GradeLabriBrush"             Color="#FFFF8080"/>
-    <!-- 누메논 -->
-    <SolidColorBrush x:Key="GradeNumenonBrush"           Color="#FF96E0E9"/>
-    <!-- 프렉탈 레어 -->
-    <SolidColorBrush x:Key="GradeFractalRareBrush"       Color="#FFFA69C7"/>
-    <!-- 프렉탈 에픽 -->
-    <SolidColorBrush x:Key="GradeFractalEpicBrush"       Color="#FFB976EF"/>
-    <!-- 프렉탈 렐릭 -->
-    <SolidColorBrush x:Key="GradeFractalRelicBrush"      Color="#FFFFFFA4"/>
-    <!-- 베니타테 -->
-    <SolidColorBrush x:Key="GradeVenitateBrush"          Color="#FF716D60"/>
-    <!-- 스텔라 -->
-    <SolidColorBrush x:Key="GradeStellaBrush"            Color="#FFD2D200"/>
-    <!-- 크리스탈 -->
-    <SolidColorBrush x:Key="GradeCrystalBrush"           Color="#FFAAFFAA"/>
-    <!-- 상위 에픽 -->
-    <SolidColorBrush x:Key="GradeHighEpicBrush"          Color="#FFFED169"/>
-
-    <!-- ========================================================= -->
     <!--  공통 치수                                                  -->
     <!-- ========================================================= -->
     <CornerRadius x:Key="ControlCornerRadius">3</CornerRadius>

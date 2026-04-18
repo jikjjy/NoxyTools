@@ -4,6 +4,13 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.0.0/)를 따르며,  
 버전 규칙은 [Semantic Versioning](https://semver.org/lang/ko/)을 따릅니다.
 
+## [0.2.15] - 2026-04-11 (Unreleased)
+
+### 수정
+- 데이터베이스 업데이트
+	- [프렉탈-에픽] 네벨베르퍼 옵션 등록. @Kerion님 제보 감사합니다.
+	- [베니타테] 릴리움XY 옵션 등록. @Kerion님 제보 감사합니다.
+
 ## [0.2.14] - 2026-03-22
 
 ### 수정

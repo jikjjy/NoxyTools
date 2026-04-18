@@ -10,6 +10,7 @@
         public DateTime? ModifyTime { get; set; } = DateTime.MinValue;
         public string CheckVersion { get; set; } = string.Empty;
 
+        public virtual string GetUniqueId() => Name.Replace(" ", string.Empty).ToUpperInvariant();
         public virtual string ToFilteringSource() => $"{Name}\t";
     }
 }
