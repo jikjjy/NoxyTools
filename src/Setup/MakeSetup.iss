@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "NoxyTools"
-#define MyAppVersion "0.3.0"
+#define MyAppVersion "0.3.1"
 #define MyAppPublisher "URUM"
 #define MyAppURL "https://cafe.naver.com/noxy"
 #define MyAppExeName "NoxyToolsWpf.exe"

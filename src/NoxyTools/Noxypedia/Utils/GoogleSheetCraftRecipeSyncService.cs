@@ -1,13 +1,11 @@
 using Noxypedia.Model;
-using System.Net.Http;
-using System.Text;
 
 namespace Noxypedia.Utils
 {
     /// <summary>
     /// 구글 시트에서 조합법 레시피 정보를 내려받아 <see cref="NoxypediaSet"/>에 반영합니다.
     /// </summary>
-    public class GoogleSheetCraftRecipeSyncService
+    public class GoogleSheetCraftRecipeSyncService : GoogleSheetSyncServiceBase
     {
         private const string SHEET_EXPORT_URL =
             "https://docs.google.com/spreadsheets/d/1zKQaN3KfBQR_w2H8HpSk6uZO9oHl7pcA/export?format=csv&gid=1394884003";
@@ -22,8 +20,6 @@ namespace Noxypedia.Utils
 
         /// <summary>시트 앞 2행(버전 정보 + 헤더)을 건너뛰고 3행부터 파싱합니다.</summary>
         private const int HEADER_ROWS = 2;
-
-        private static readonly HttpClient _httpClient = new HttpClient();
 
         // ── 공개 API ─────────────────────────────────────────────────────────
 
@@ -65,10 +61,11 @@ namespace Noxypedia.Utils
         /// <returns>(업데이트된 레시피 수, 새로 추가된 레시피 수, 스킵된 재료 로그)</returns>
         public (int synced, int added, IReadOnlyList<string> skipLog) ApplyCsv(NoxypediaSet data, string csv)
         {
-            var lines   = SplitCsvLines(csv);
-            int synced  = 0;
-            int added   = 0;
-            var skipLog = new List<string>();
+            var lines          = SplitCsvLines(csv);
+            int synced         = 0;
+            int added          = 0;
+            var skipLog        = new List<string>();
+            var missingItems   = new HashSet<string>(StringComparer.Ordinal);
 
             for (int i = HEADER_ROWS; i < lines.Count; i++)
             {
@@ -85,7 +82,7 @@ namespace Noxypedia.Utils
                 string successProbRaw = COL_SUCCESS_PROB < cols.Length ? cols[COL_SUCCESS_PROB].Trim(): string.Empty;
 
                 // --- 조합 장소 ---
-                LocationSet location = FindOrCreateLocation(data, locationName);
+                LocationSet location = FindOrCreateLocation(data, locationName, skipLog, sheetRow);
 
                 // --- 조합 재료 E~I ---
                 var materials          = new List<ItemSet>();
@@ -108,7 +105,10 @@ namespace Noxypedia.Utils
                             if (altItem != null)
                                 altGroup.Add(altItem);
                             else
+                            {
                                 skipLog.Add($"[행 {sheetRow}] {baseItemName}: '{altName.Trim()}' (or 대체 재료)");
+                                missingItems.Add(altName.Trim());
+                            }
                         }
                         if (altGroup.Count > 0)
                             substituteMaterials.Add(altGroup);
@@ -119,7 +119,10 @@ namespace Noxypedia.Utils
                         if (matItem != null)
                             materials.Add(matItem);
                         else
+                        {
                             skipLog.Add($"[행 {sheetRow}] {baseItemName}: '{matRaw}'");
+                            missingItems.Add(matRaw);
+                        }
                     }
                 }
 
@@ -167,12 +170,21 @@ namespace Noxypedia.Utils
             // 전체 참조 관계 재구성
             data.RebuildDataRelations();
 
+            // 미등록 아이템 요약 (중복 제거)
+            if (missingItems.Count > 0)
+            {
+                skipLog.Add(string.Empty);
+                skipLog.Add($"── 미등록 아이템 목록 ({missingItems.Count}개) ──");
+                foreach (var item in missingItems.OrderBy(x => x))
+                    skipLog.Add($"  • {item}");
+            }
+
             return (synced, added, skipLog);
         }
 
         // ── 내부 헬퍼 ────────────────────────────────────────────────────────
 
-        private static LocationSet FindOrCreateLocation(NoxypediaSet data, string name)
+        private static LocationSet FindOrCreateLocation(NoxypediaSet data, string name, List<string> log, int sheetRow)
         {
             if (string.IsNullOrWhiteSpace(name)) return new LocationSet();
 
@@ -182,6 +194,7 @@ namespace Noxypedia.Utils
 
             var newLocation = new LocationSet { Name = name };
             data.Locations.Add(newLocation);
+            log.Add($"[행 {sheetRow}] 새 조합 장소 추가: '{name}'");
             return newLocation;
         }
 
@@ -195,73 +208,11 @@ namespace Noxypedia.Utils
 
             return null;
 
-
+            // 아이템이 시트에 있지만 NoxypediaSet에 등록되지 않은 경우 → 스킵 + 로그
             //var newItem = new ItemSet { Name = name };
             //data.Items.Add(newItem);
             //return newItem;
         }
 
-        /// <summary>BaseModel.GetUniqueId() 와 동일한 규칙으로 ID를 생성합니다.</summary>
-        private static string MakeUniqueId(string name)
-            => name.Replace(" ", string.Empty).ToUpperInvariant();
-
-        // ── CSV 파서 ─────────────────────────────────────────────────────────
-
-        private static List<string> SplitCsvLines(string csv)
-            => csv.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-
-        /// <summary>RFC 4180 형식의 CSV 한 행을 필드 배열로 파싱합니다 (따옴표 처리 포함).</summary>
-        private static string[] ParseCsvLine(string line)
-        {
-            var fields = new List<string>();
-            int i = 0;
-            while (i <= line.Length)
-            {
-                if (i == line.Length)
-                {
-                    // 마지막 필드가 비어 있는 경우 (행 끝 쉼표)
-                    fields.Add(string.Empty);
-                    break;
-                }
-
-                if (line[i] == '"')
-                {
-                    // 따옴표로 감싼 필드
-                    i++;
-                    var sb = new StringBuilder();
-                    while (i < line.Length)
-                    {
-                        if (line[i] == '"')
-                        {
-                            if (i + 1 < line.Length && line[i + 1] == '"')
-                            {
-                                sb.Append('"');
-                                i += 2;
-                            }
-                            else
-                            {
-                                i++;
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            sb.Append(line[i++]);
-                        }
-                    }
-                    fields.Add(sb.ToString());
-                    if (i < line.Length && line[i] == ',') i++;
-                }
-                else
-                {
-                    // 따옴표 없는 필드
-                    int start = i;
-                    while (i < line.Length && line[i] != ',') i++;
-                    fields.Add(line[start..i]);
-                    if (i < line.Length) i++; // 쉼표 건너뜀
-                }
-            }
-            return fields.ToArray();
-        }
     }
 }

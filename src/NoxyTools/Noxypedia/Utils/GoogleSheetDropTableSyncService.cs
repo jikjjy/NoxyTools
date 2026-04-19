@@ -1,6 +1,4 @@
 using Noxypedia.Model;
-using System.Net.Http;
-using System.Text;
 
 namespace Noxypedia.Utils
 {
@@ -13,7 +11,7 @@ namespace Noxypedia.Utils
     /// - 등록되지 않은 아이템은 스킵합니다.
     /// </para>
     /// </summary>
-    public class GoogleSheetDropTableSyncService
+    public class GoogleSheetDropTableSyncService : GoogleSheetSyncServiceBase
     {
         private const string SHEET_EXPORT_URL =
             "https://docs.google.com/spreadsheets/d/1zKQaN3KfBQR_w2H8HpSk6uZO9oHl7pcA/export?format=csv&gid=1836371832";
@@ -24,8 +22,6 @@ namespace Noxypedia.Utils
         private const int COL_DROP_END   = 11; // L: 드랍 아이템 10
 
         private const int HEADER_ROWS = 2;
-
-        private static readonly HttpClient _httpClient = new HttpClient();
 
         // ── 공개 API ─────────────────────────────────────────────────────────
 
@@ -82,7 +78,7 @@ namespace Noxypedia.Utils
                 int sheetRow = i + 1; // 1-based 행 번호
 
                 // --- 지역: 없으면 추가 ---
-                RegionSet region = FindOrCreateRegion(data, regionName);
+                RegionSet region = FindOrCreateRegion(data, regionName, skipLog, sheetRow);
 
                 // --- 몬스터: 없으면 추가 ---
                 string creepUid = MakeUniqueId(creepName);
@@ -144,7 +140,7 @@ namespace Noxypedia.Utils
 
         // ── 내부 헬퍼 ────────────────────────────────────────────────────────
 
-        private static RegionSet FindOrCreateRegion(NoxypediaSet data, string name)
+        private static RegionSet FindOrCreateRegion(NoxypediaSet data, string name, List<string> log, int sheetRow)
         {
             if (string.IsNullOrWhiteSpace(name)) return new RegionSet();
 
@@ -154,65 +150,9 @@ namespace Noxypedia.Utils
 
             var newRegion = new RegionSet { Name = name };
             data.Regions.Add(newRegion);
+            log.Add($"[행 {sheetRow}] 새 지역 추가: '{name}'");
             return newRegion;
         }
 
-        private static string MakeUniqueId(string name)
-            => name.Replace(" ", string.Empty).ToUpperInvariant();
-
-        // ── CSV 파서 (GoogleSheetCraftRecipeSyncService와 동일 구현) ─────────
-
-        private static List<string> SplitCsvLines(string csv)
-            => csv.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-
-        private static string[] ParseCsvLine(string line)
-        {
-            var fields = new List<string>();
-            int i = 0;
-            while (i <= line.Length)
-            {
-                if (i == line.Length)
-                {
-                    fields.Add(string.Empty);
-                    break;
-                }
-
-                if (line[i] == '"')
-                {
-                    i++;
-                    var sb = new StringBuilder();
-                    while (i < line.Length)
-                    {
-                        if (line[i] == '"')
-                        {
-                            if (i + 1 < line.Length && line[i + 1] == '"')
-                            {
-                                sb.Append('"');
-                                i += 2;
-                            }
-                            else
-                            {
-                                i++;
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            sb.Append(line[i++]);
-                        }
-                    }
-                    fields.Add(sb.ToString());
-                    if (i < line.Length && line[i] == ',') i++;
-                }
-                else
-                {
-                    int start = i;
-                    while (i < line.Length && line[i] != ',') i++;
-                    fields.Add(line[start..i]);
-                    if (i < line.Length) i++;
-                }
-            }
-            return fields.ToArray();
-        }
     }
 }

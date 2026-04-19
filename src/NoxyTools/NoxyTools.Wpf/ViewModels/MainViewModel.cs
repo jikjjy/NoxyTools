@@ -54,6 +54,10 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isCraftRecipeUpdateAvailable;
 
+    /// <summary>앱 신규 버전이 있을 때 true</summary>
+    [ObservableProperty]
+    private bool _isAppUpdateAvailable;
+
     /// <summary>마지막으로 동기화된 조합법 DB 버전 (구글 시트 A1 값)</summary>
     [ObservableProperty]
     private string _craftRecipeDbVersion = string.Empty;
@@ -348,12 +352,51 @@ public partial class MainViewModel : ViewModelBase
             return;
         }
 
+        IsAppUpdateAvailable = true;
+
         var win = new UpdateWindow(_updateVm)
         {
             Owner = Application.Current.MainWindow
         };
         win.ShowDialog();
         SetStatus("준비");
+    }
+
+    [RelayCommand]
+    private async Task UpdateAllAsync()
+    {
+        if (IsLoading) return;
+
+        // 1. 앱 업데이트 확인
+        SetStatus("업데이트 확인 중...");
+        await _updateVm.CheckForUpdateCommand.ExecuteAsync(null);
+
+        if (_updateVm.IsUpdateAvailable)
+        {
+            IsAppUpdateAvailable = true;
+            var win = new UpdateWindow(_updateVm)
+            {
+                Owner = Application.Current.MainWindow
+            };
+            win.ShowDialog();
+            SetStatus("준비");
+            return;
+        }
+
+        // 2. 구글 시트 동기화
+        StartLoading("구글 시트 동기화 중");
+        try
+        {
+            var (craftSynced, craftAdded, craftVer) = await _cache.SyncCraftRecipesFromGoogleSheetAsync();
+            var (dropSynced, dropAdded, dropVer)    = await _cache.SyncDropTableFromGoogleSheetAsync();
+            saveSyncResult(craftVer, dropVer);
+            _noxypediaSearchVm.RefreshData();
+            StopLoading($"동기화 완료 (조합법 {craftSynced + craftAdded}개, 드랍 {dropSynced + dropAdded}개)");
+        }
+        catch (Exception ex)
+        {
+            StopLoading($"동기화 실패: {ex.Message}");
+        }
     }
 
     // --- 앱 종료 처리 ---
