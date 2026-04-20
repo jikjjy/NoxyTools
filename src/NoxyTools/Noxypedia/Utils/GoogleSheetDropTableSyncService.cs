@@ -1,4 +1,5 @@
 using Noxypedia.Model;
+using System.Xml.Linq;
 
 namespace Noxypedia.Utils
 {
@@ -86,6 +87,7 @@ namespace Noxypedia.Utils
                 bool isNew = creep == null;
                 if (isNew)
                 {
+                    skipLog.Add($"[행 {sheetRow}] 새 몬스터 추가: '{creepName}'");
                     creep = new CreepSet { Name = creepName };
                     data.Creeps.Add(creep);
                     added++;
@@ -153,6 +155,5 @@ namespace Noxypedia.Utils
             log.Add($"[행 {sheetRow}] 새 지역 추가: '{name}'");
             return newRegion;
         }
-
     }
 }
