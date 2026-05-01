@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Noxypedia.Utils;
 using NoxyTools.Core.Services;
 using NoxyTools.Wpf.Services;
 using NoxyTools.Wpf.ViewModels.Base;
@@ -336,6 +337,9 @@ public partial class MainViewModel : ViewModelBase
 
         _config.GoogleSheetLastSyncAppVersion = AppVersion;
         IsCraftRecipeUpdateAvailable = false;
+
+        var datPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "noxypedia.dat");
+        _cache.SaveDataToCache(NoxypediaDataFile.ReadVersion(datPath));
     }
 
     // --- 업데이트 확인 ---

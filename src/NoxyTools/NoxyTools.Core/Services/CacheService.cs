@@ -191,6 +191,16 @@ namespace NoxyTools.Core.Services
             return bitmap;
         }
 
+        /// <summary>
+        /// 동기화된 현재 NoxypediaData를 캐시 파일에 저장합니다.
+        /// 다음 실행 시 캐시 버전 ≥ dat 버전이므로 캐시가 우선 로드됩니다.
+        /// </summary>
+        public void SaveDataToCache(int datVersion)
+        {
+            checkDirectory(mBasePath);
+            NoxypediaDataFile.Save(NoxypediaData, datVersion, mNoxypediaCacheFile);
+        }
+
         private static void checkDirectory(string path)
         {
             if (Directory.Exists(path) == false)
