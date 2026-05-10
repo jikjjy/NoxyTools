@@ -99,6 +99,28 @@ namespace NoxyTools.Core.Services
             UpdateSummary();
         }
 
+        /// <summary>
+        /// ItemSimulatorSet 데이터를 직접 주입하여 로드합니다.
+        /// ConfigService 없이 두 번째 세트 등을 초기화할 때 사용합니다.
+        /// </summary>
+        public void LoadDirect(ItemSimulatorSet data, CacheService cache)
+        {
+            mData = data;
+            var emptyItemSet = ItemSet.Empty;
+            for (int i = 0; i < mData.ItemSlots.Length; i++)
+            {
+                var itemSlot = mData.ItemSlots[i];
+                if (itemSlot.Name == emptyItemSet.Name)
+                {
+                    continue;
+                }
+                var findItem = cache.NoxypediaData?.Items.Find(item => item.Name == itemSlot.Name);
+                mData.ItemSlots[i] = findItem ?? ItemSet.Empty;
+            }
+            ItemSlotChanged?.Invoke(this, EventArgs.Empty);
+            UpdateSummary();
+        }
+
         public bool SaveFile(string path)
         {
             string directoryName = Path.GetDirectoryName(path);
@@ -164,13 +186,23 @@ namespace NoxyTools.Core.Services
 
         private void UpdateSummary()
         {
+            mSummary = ComputeSummary(mData.ItemSlots, SelectClass);
+            SummaryChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// 임의의 슬롯 배열에 대해 요약 스탯을 계산합니다.
+        /// 스냅샷 비교 등 외부에서도 사용할 수 있습니다.
+        /// </summary>
+        public ItemSet ComputeSummary(IEnumerable<ItemSet> slots, EClassFlags cls)
+        {
             double addAttack = 0d;
             double addArmor = 0d;
             double addHP = 0d;
             double addMP = 0d;
             var emptyItemSet = ItemSet.Empty;
-            mSummary = EMPTY_SUMMARY;
-            foreach (var itemSlot in mData.ItemSlots)
+            var summary = EMPTY_SUMMARY;
+            foreach (var itemSlot in slots)
             {
                 if (itemSlot.Name == emptyItemSet.Name)
                 {
@@ -181,25 +213,25 @@ namespace NoxyTools.Core.Services
                     continue;
                 }
 
-                mSummary.UniqueOptions.AddRange(itemSlot.UniqueOptions);
+                summary.UniqueOptions.AddRange(itemSlot.UniqueOptions);
                 if (itemSlot.Strength.HasValue == true)
                 {
-                    mSummary.Strength += itemSlot.Strength;
+                    summary.Strength += itemSlot.Strength;
                     addHP += (itemSlot.Strength.Value * HP_PER_STATE);
 
-                    if (SelectClass.HasFlag(EClassFlags.Knight) == true)
+                    if (cls.HasFlag(EClassFlags.Knight) == true)
                     {
                         addAttack += (itemSlot.Strength.Value * ATTACK_PER_STATE);
                     }
                 }
                 if (itemSlot.Agility.HasValue == true)
                 {
-                    mSummary.Agility += itemSlot.Agility;
+                    summary.Agility += itemSlot.Agility;
                     addArmor += (itemSlot.Agility.Value * ARMOR_PER_STATE);
 
                     if (
-                        SelectClass.HasFlag(EClassFlags.Archer) == true
-                        || SelectClass.HasFlag(EClassFlags.Druid) == true
+                        cls.HasFlag(EClassFlags.Archer) == true
+                        || cls.HasFlag(EClassFlags.Druid) == true
                         )
                     {
                         addAttack += (itemSlot.Agility.Value * ATTACK_PER_STATE);
@@ -207,13 +239,13 @@ namespace NoxyTools.Core.Services
                 }
                 if (itemSlot.Inteligence.HasValue == true)
                 {
-                    mSummary.Inteligence += itemSlot.Inteligence;
+                    summary.Inteligence += itemSlot.Inteligence;
                     addMP += (itemSlot.Inteligence.Value * MP_PER_STATE);
 
                     if (
-                        SelectClass.HasFlag(EClassFlags.Wizard) == true
-                        || SelectClass.HasFlag(EClassFlags.Priest) == true
-                        || SelectClass.HasFlag(EClassFlags.Summoner) == true
+                        cls.HasFlag(EClassFlags.Wizard) == true
+                        || cls.HasFlag(EClassFlags.Priest) == true
+                        || cls.HasFlag(EClassFlags.Summoner) == true
                         )
                     {
                         addAttack += (itemSlot.Inteligence.Value * ATTACK_PER_STATE);
@@ -221,27 +253,27 @@ namespace NoxyTools.Core.Services
                 }
                 if (itemSlot.Attack.HasValue == true)
                 {
-                    mSummary.Attack += itemSlot.Attack;
+                    summary.Attack += itemSlot.Attack;
                 }
                 if (itemSlot.Armor.HasValue == true)
                 {
-                    mSummary.Armor += itemSlot.Armor;
+                    summary.Armor += itemSlot.Armor;
                 }
                 if (itemSlot.HP.HasValue == true)
                 {
-                    mSummary.HP += itemSlot.HP;
+                    summary.HP += itemSlot.HP;
                 }
                 if (itemSlot.MP.HasValue == true)
                 {
-                    mSummary.MP += itemSlot.MP;
+                    summary.MP += itemSlot.MP;
                 }
             }
-            mSummary.Attack += Convert.ToInt32(addAttack);
-            mSummary.Armor += Convert.ToInt32(addArmor);
-            mSummary.HP += Convert.ToInt32(addHP);
-            mSummary.MP += Convert.ToInt32(addMP);
+            summary.Attack += Convert.ToInt32(addAttack);
+            summary.Armor += Convert.ToInt32(addArmor);
+            summary.HP += Convert.ToInt32(addHP);
+            summary.MP += Convert.ToInt32(addMP);
 
-            SummaryChanged?.Invoke(this, EventArgs.Empty);
+            return summary;
         }
     }
 }

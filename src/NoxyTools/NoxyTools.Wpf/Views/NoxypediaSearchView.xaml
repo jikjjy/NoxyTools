@@ -576,17 +576,30 @@
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Grid HorizontalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
                         <!-- ◀ 이전 아이템 버튼 + 다중 선택 팝업 -->
-                        <Grid>
+                        <Grid Grid.Column="0" Margin="0,0,8,0">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding NavPreviousVisible}" Value="False">
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
                             <Button x:Name="BtnNavPrev"
                                     Content="◀ 이전 아이템"
                                     Command="{Binding NavigatePreviousCommand}"
-                                    Visibility="{Binding NavPreviousVisible, Converter={StaticResource BoolToVisibilityConverter}}"
                                     Style="{StaticResource SpeedButtonStyle}"
                                     Width="Auto" Height="Auto" MinHeight="28"
-                                    Padding="12,4" Margin="0,0,8,0"/>
+                                    Padding="12,4"/>
                             <Popup x:Name="NavPrevPopup"
                                    IsOpen="{Binding IsNavPreviousPopupOpen, Mode=TwoWay}"
                                    PlacementTarget="{Binding ElementName=BtnNavPrev}"
@@ -629,11 +642,20 @@
                         </Grid>
 
                         <!-- 다음 아이템 ▶ 버튼 + 다중 선택 팝업 -->
-                        <Grid>
+                        <Grid Grid.Column="1">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding NavNextVisible}" Value="False">
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
                             <Button x:Name="BtnNavNext"
                                     Content="다음 아이템 ▶"
                                     Command="{Binding NavigateNextCommand}"
-                                    Visibility="{Binding NavNextVisible, Converter={StaticResource BoolToVisibilityConverter}}"
                                     Style="{StaticResource SpeedButtonStyle}"
                                     Width="Auto" Height="Auto" MinHeight="28"
                                     Padding="12,4"/>
@@ -678,7 +700,7 @@
                             </Popup>
                         </Grid>
 
-                    </StackPanel>
+                    </Grid>
                 </Border>
             </Grid>
         </Grid>

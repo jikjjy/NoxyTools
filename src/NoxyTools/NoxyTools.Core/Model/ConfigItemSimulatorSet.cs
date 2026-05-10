@@ -34,6 +34,36 @@ namespace NoxyTools.Core.Model
                 mRegistary.SetValue(nameof(ItemPresetData), stream.ToArray());
             }
         }
+
+        /// <summary>세트 B의 프리셋 데이터 (비교 세트)</summary>
+        public ItemSimulatorSet ItemPresetDataB
+        {
+            get
+            {
+                try
+                {
+                    using var stream = new MemoryStream(mRegistary.GetValue(nameof(ItemPresetDataB), Array.Empty<byte>()) as byte[]);
+                    if (stream.Length == 0)
+                    {
+                        var newObject = new ItemSimulatorSet();
+                        ItemPresetDataB = newObject;
+                        return newObject;
+                    }
+                    return mBinaryFormatter.Deserialize(stream) as ItemSimulatorSet;
+                }
+                catch
+                {
+                    return new ItemSimulatorSet();
+                }
+            }
+            set
+            {
+                using var stream = new MemoryStream();
+                value ??= new ItemSimulatorSet();
+                mBinaryFormatter.Serialize(stream, value);
+                mRegistary.SetValue(nameof(ItemPresetDataB), stream.ToArray());
+            }
+        }
         public int WindowSplitterDistance
         {
             get

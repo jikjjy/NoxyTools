@@ -82,7 +82,6 @@ public partial class App : Application
         services.AddSingleton<ConfigService>();
         services.AddSingleton<CacheService>();
         services.AddSingleton<StatisticsService>();
-        services.AddSingleton<ItemSimulatorService>();
         services.AddSingleton<ItemStatisticsService>();
         services.AddSingleton<FavoriteService>();
 

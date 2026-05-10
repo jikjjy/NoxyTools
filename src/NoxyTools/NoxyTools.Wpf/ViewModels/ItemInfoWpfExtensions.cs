@@ -36,6 +36,10 @@ internal static class ItemInfoWpfExtensions
         Freeze(new SolidColorBrush(Color.FromRgb(0xFF, 0x69, 0x00)));  // OrangeRed
     private static readonly SolidColorBrush FgSecondary =
         Freeze(new SolidColorBrush(Color.FromRgb(0x99, 0x99, 0x99)));
+    private static readonly SolidColorBrush FgExclusive =
+        Freeze(new SolidColorBrush(Color.FromRgb(0x40, 0xC8, 0xFF)));  // 이 세트에만 있는 옵션 (하늘색)
+    private static readonly SolidColorBrush FgCommon =
+        Freeze(new SolidColorBrush(Color.FromRgb(0x90, 0x90, 0x90)));  // 양쪽 공통 옵션 (회색)
     private static readonly SolidColorBrush BgDoc =
         Freeze(new SolidColorBrush(Color.FromRgb(0x1E, 0x1E, 0x1E)));
 
@@ -260,6 +264,15 @@ internal static class ItemInfoWpfExtensions
     /// 장비 시뮬레이터 유니크 옵션 합산 표시용 FlowDocument 생성.
     /// </summary>
     public static FlowDocument BuildUniqueOptionsDocument(IEnumerable<UniqueOptionSet> options)
+        => BuildUniqueOptionsDocument(options, null);
+
+    /// <summary>
+    /// 장비 시뮬레이터 유니크 옵션 FlowDocument (다른 세트와 diff 비교 포함).
+    /// <para>이 세트에만 있는 옵션은 하늘색으로, 양쪽 공통 옵션은 회색으로 표시합니다.</para>
+    /// </summary>
+    public static FlowDocument BuildUniqueOptionsDocument(
+        IEnumerable<UniqueOptionSet> options,
+        IReadOnlySet<string>? otherSetNames)
     {
         var doc = MakeDoc();
         const string OPTION_DODGE = "회피";
@@ -271,13 +284,27 @@ internal static class ItemInfoWpfExtensions
 
         foreach (var group in optList.GroupBy(o => o.Name).OrderBy(g => g.Key))
         {
+            // diff 모드: 이 세트에만 있으면 강조, 양쪽 공통이면 흐리게
+            bool exclusive = otherSetNames != null && !otherSetNames.Contains(group.Key);
+            bool isCommon  = otherSetNames != null && !exclusive;
+
+            var nameBrush = exclusive ? FgExclusive
+                          : isCommon  ? FgCommon
+                                      : FgDefault;
+
             var para = new Paragraph { Margin = new Thickness(0) };
+
+            // 이 세트에만 있는 옵션 앞에 마커 표시
+            if (exclusive)
+                para.Inlines.Add(new Run("★ ") { Foreground = FgExclusive, FontWeight = FontWeights.Bold });
+
             para.Inlines.Add(new Run($"「{group.Key}」")
-            { FontWeight = System.Windows.FontWeights.Bold, Foreground = FgDefault });
+            { FontWeight = FontWeights.Bold, Foreground = nameBrush });
+
             var desc = group.First().EffectDescription ?? "";
             if (!string.IsNullOrWhiteSpace(desc))
                 para.Inlines.Add(new Run($" {desc}")
-                { FontSize = 10, Foreground = FgSecondary });
+                { FontSize = 10, Foreground = isCommon ? FgCommon : FgSecondary });
 
             if (group.Count() > 1)
                 para.Inlines.Add(new Run($" (중복: {group.Count()}개)")

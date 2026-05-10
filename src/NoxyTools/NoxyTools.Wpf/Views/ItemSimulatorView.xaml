@@ -1,4 +1,4 @@
-<UserControl x:Class="NoxyTools.Wpf.Views.ItemSimulatorView"
+﻿<UserControl x:Class="NoxyTools.Wpf.Views.ItemSimulatorView"
              x:Name="ItemSimulatorRoot"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,6 +7,7 @@
              xmlns:vm="clr-namespace:NoxyTools.Wpf.ViewModels"
              xmlns:ctrl="clr-namespace:NoxyTools.Wpf.Controls"
              xmlns:conv="clr-namespace:NoxyTools.Wpf.Converters"
+             xmlns:util="clr-namespace:NoxyTools.Wpf.Utils"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:ItemSimulatorViewModel, IsDesignTimeCreatable=False}">
 
@@ -42,127 +43,284 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin"     Value="0,1"/>
         </Style>
+
+        <!-- 세트 패널용 공통 DataTemplate (SetA / SetB 공유) -->
+        <DataTemplate x:Key="SimulatorSetTemplate" DataType="{x:Type vm:SimulatorSetViewModel}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>  <!-- 세트 툴바 -->
+                    <RowDefinition Height="Auto"/>  <!-- 슬롯 목록 -->
+                    <RowDefinition Height="Auto"/>  <!-- 구분선 -->
+                    <RowDefinition Height="Auto"/>  <!-- 스탯 요약 -->
+                    <RowDefinition Height="*"/>     <!-- 유니크 옵션 -->
+                </Grid.RowDefinitions>
+
+                <!-- 세트 툴바 -->
+                <Border Grid.Row="0"
+                        Background="{StaticResource MenuBarBackgroundBrush}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="0,0,0,1"
+                        Padding="6,4">
+                    <!-- Grid 레이아웃: 버튼/이름 고정 너비 → 상태 메시지 가변 → 직업 고정 -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>   <!-- 세트 이름 -->
+                            <ColumnDefinition Width="Auto"/>   <!-- 불러오기 -->
+                            <ColumnDefinition Width="Auto"/>   <!-- 저장 -->
+                            <ColumnDefinition Width="Auto"/>   <!-- 전체 해제 -->
+                            <ColumnDefinition Width="*" MinWidth="0"/>  <!-- 상태 메시지 -->
+                            <ColumnDefinition Width="Auto"/>   <!-- 직업: -->
+                            <ColumnDefinition Width="Auto"/>   <!-- 콤보박스 -->
+                        </Grid.ColumnDefinitions>
+
+                        <!-- 세트 이름 레이블 -->
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding Label}"
+                                   FontWeight="SemiBold"
+                                   FontSize="12"
+                                   Foreground="{StaticResource PrimaryTextBrush}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"/>
+
+                        <Button Grid.Column="1"
+                                Content="불러오기"
+                                Command="{Binding LoadPresetCommand}"
+                                Style="{StaticResource SpeedButtonStyle}"
+                                Width="Auto" Height="Auto"
+                                Padding="6,3" Margin="0,0,2,0"/>
+                        <Button Grid.Column="2"
+                                Content="저장"
+                                Command="{Binding SavePresetCommand}"
+                                Style="{StaticResource SpeedButtonStyle}"
+                                Width="Auto" Height="Auto"
+                                Padding="6,3" Margin="0,0,2,0"/>
+                        <Button Grid.Column="3"
+                                Content="전체 해제"
+                                Command="{Binding ClearAllCommand}"
+                                Style="{StaticResource SpeedButtonStyle}"
+                                Width="Auto" Height="Auto"
+                                Padding="6,3" Margin="0,0,4,0"/>
+
+                        <!-- 상태 메시지: 남은 공간 차지, 넘치면 말줄임 -->
+                        <TextBlock Grid.Column="4"
+                                   Text="{Binding StatusMessage}"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   FontSize="10"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis"/>
+
+                        <!-- 직업 콤보박스 -->
+                        <TextBlock Grid.Column="5"
+                                   Text="직업:"
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   Margin="8,0,4,0"/>
+                        <ComboBox Grid.Column="6"
+                                  ItemsSource="{Binding ClassNames}"
+                                  SelectedItem="{Binding SelectedClassName}"
+                                  MinWidth="70"
+                                  VerticalContentAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <!-- 슬롯 목록 -->
+                <ItemsControl Grid.Row="1"
+                              x:Name="SlotsIC"
+                              ItemsSource="{Binding Slots}"
+                              Margin="4,4,4,0"
+                              Tag="{Binding}"
+                              PreviewMouseRightButtonUp="AnySlots_RightClick">                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Tag="{Binding}"
+                                    Command="{Binding DataContext.SlotClickCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    CommandParameter="{Binding}"
+                                    Foreground="{Binding Foreground}"
+                                    Width="Auto" Height="Auto"
+                                    HorizontalContentAlignment="Left"
+                                    Padding="6,4" MinHeight="28" Margin="0,0,0,2">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource SpeedButtonStyle}">
+                                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource AccentPressedBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsChanged}" Value="True">
+                                                <Setter Property="BorderBrush" Value="#FF8C00"/>
+                                                <Setter Property="BorderThickness" Value="1"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="{Binding Image}"
+                                           Width="24" Height="24"
+                                           Margin="0,0,5,0"
+                                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                           Visibility="{Binding Image, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                    <TextBlock Text="{Binding Text}"
+                                               VerticalAlignment="Center"
+                                               FontSize="11"
+                                               TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- 구분선 -->
+                <Separator Grid.Row="2" Background="{StaticResource BorderBrush}" Margin="4,2"/>
+
+                <!-- 스탯 요약 -->
+                <Grid Grid.Row="3" Margin="8,4,8,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>  <!-- 레이블 -->
+                        <ColumnDefinition Width="*"/>     <!-- 값 -->
+                        <ColumnDefinition Width="Auto"/>  <!-- delta (vs 다른 세트) -->
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="공격력" Style="{StaticResource StatLabelStyle}"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="방어력" Style="{StaticResource StatLabelStyle}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="체력"   Style="{StaticResource StatLabelStyle}"/>
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="마나"   Style="{StaticResource StatLabelStyle}"/>
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="힘"     Style="{StaticResource StatLabelStyle}"/>
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="민첩"   Style="{StaticResource StatLabelStyle}"/>
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="지능"   Style="{StaticResource StatLabelStyle}"/>
+
+                    <!-- 현재 값 -->
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SummaryAttack.Text}"       Foreground="{Binding SummaryAttack.Foreground}"       FontSize="11" Margin="8,1,0,1" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SummaryArmor.Text}"        Foreground="{Binding SummaryArmor.Foreground}"        FontSize="11" Margin="8,1,0,1" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SummaryHP.Text}"           Foreground="{Binding SummaryHP.Foreground}"           FontSize="11" Margin="8,1,0,1" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SummaryMP.Text}"           Foreground="{Binding SummaryMP.Foreground}"           FontSize="11" Margin="8,1,0,1" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SummaryStrength.Text}"     Foreground="{Binding SummaryStrength.Foreground}"     FontSize="11" Margin="8,1,0,1" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SummaryAgility.Text}"      Foreground="{Binding SummaryAgility.Foreground}"      FontSize="11" Margin="8,1,0,1" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding SummaryIntelligence.Text}" Foreground="{Binding SummaryIntelligence.Foreground}" FontSize="11" Margin="8,1,0,1" VerticalAlignment="Center"/>
+
+                    <!-- 다른 세트 대비 delta -->
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding DeltaAttack.Text}"       Foreground="{Binding DeltaAttack.Foreground}"       FontSize="10" Margin="6,1,0,1" VerticalAlignment="Center" Opacity="0.85"/>
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding DeltaArmor.Text}"        Foreground="{Binding DeltaArmor.Foreground}"        FontSize="10" Margin="6,1,0,1" VerticalAlignment="Center" Opacity="0.85"/>
+                    <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding DeltaHP.Text}"           Foreground="{Binding DeltaHP.Foreground}"           FontSize="10" Margin="6,1,0,1" VerticalAlignment="Center" Opacity="0.85"/>
+                    <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding DeltaMP.Text}"           Foreground="{Binding DeltaMP.Foreground}"           FontSize="10" Margin="6,1,0,1" VerticalAlignment="Center" Opacity="0.85"/>
+                    <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding DeltaStrength.Text}"     Foreground="{Binding DeltaStrength.Foreground}"     FontSize="10" Margin="6,1,0,1" VerticalAlignment="Center" Opacity="0.85"/>
+                    <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding DeltaAgility.Text}"      Foreground="{Binding DeltaAgility.Foreground}"      FontSize="10" Margin="6,1,0,1" VerticalAlignment="Center" Opacity="0.85"/>
+                    <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding DeltaIntelligence.Text}" Foreground="{Binding DeltaIntelligence.Foreground}" FontSize="10" Margin="6,1,0,1" VerticalAlignment="Center" Opacity="0.85"/>
+                </Grid>
+
+                <!-- 유니크 옵션 -->
+                <RichTextBox Grid.Row="4"
+                             x:Name="UniqueRtb"
+                             IsReadOnly="True"
+                             Background="#1E1E1E"
+                             Foreground="#E0E0E0"
+                             FontFamily="맑은 고딕, Malgun Gothic"
+                             FontSize="11"
+                             Padding="8"
+                             BorderBrush="{StaticResource BorderBrush}"
+                             BorderThickness="0,1,0,0"
+                             VerticalScrollBarVisibility="Auto"
+                             util:RichTextBoxHelper.Document="{Binding UniqueOptionsDocument}">
+                    <FlowDocument/>
+                </RichTextBox>
+            </Grid>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid Background="{StaticResource SurfaceBackgroundBrush}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>   <!-- 툴바 -->
-            <RowDefinition Height="*"/>      <!-- 주 컨텐츠 -->
-        </Grid.RowDefinitions>
-
-        <!-- ── 툴바 ─────────────────────────────────────────────────── -->
-        <Border Grid.Row="0"
-                Background="{StaticResource MenuBarBackgroundBrush}"
-                BorderBrush="{StaticResource BorderBrush}"
-                BorderThickness="0,0,0,1"
-                Padding="8,4">
-            <DockPanel>
-                <!-- 상태 메시지 (우측 고정) -->
-                <TextBlock DockPanel.Dock="Right"
-                           Text="{Binding StatusMessage}"
-                           Foreground="{StaticResource SecondaryTextBrush}"
-                           FontSize="11"
-                           VerticalAlignment="Center"
-                           Margin="8,0,0,0"/>
-
-                <Button Content="불러오기"
-                        Command="{Binding LoadPresetCommand}"
-                        Style="{StaticResource SpeedButtonStyle}"
-                        Width="Auto" Height="Auto"
-                        Padding="8,3" Margin="0,0,4,0"/>
-                <Button Content="저장"
-                        Command="{Binding SavePresetCommand}"
-                        Style="{StaticResource SpeedButtonStyle}"
-                        Width="Auto" Height="Auto"
-                        Padding="8,3" Margin="0,0,12,0"/>
-                <Button Content="전체 해제"
-                        Command="{Binding ClearAllCommand}"
-                        Style="{StaticResource SpeedButtonStyle}"
-                        Width="Auto" Height="Auto"
-                        Padding="8,3" Margin="0,0,12,0"/>
-
-                <!-- 직업 -->
-                <TextBlock Text="직업:"
-                           VerticalAlignment="Center"
-                           Foreground="{StaticResource SecondaryTextBrush}"
-                           Margin="0,0,4,0"/>
-                <ComboBox ItemsSource="{Binding ClassNames}"
-                          SelectedItem="{Binding SelectedClassName}"
-                          MinWidth="80"
-                          VerticalContentAlignment="Center"/>
-            </DockPanel>
-        </Border>
-
-        <!-- ── 주 컨텐츠: SearchItem | 구분자 | 오른쪽 패널 ──────── -->
-        <Grid Grid.Row="1">
+        <!-- ── 메인 영역: 좌(검색) | 우(아이템 정보 + 세트 A/B) ─────── -->
+        <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300" MinWidth="180" MaxWidth="480"/>
-                <ColumnDefinition Width="4"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="300" MinWidth="200" MaxWidth="500"/>  <!-- 검색 -->
+                <ColumnDefinition Width="4"/>                                   <!-- 수직 분리선 -->
+                <ColumnDefinition Width="*"/>                                   <!-- 우측 패널 -->
             </Grid.ColumnDefinitions>
 
-            <!-- 좌: 아이템 검색 -->
+            <!-- 좌: 아이템 검색 (전체 높이) -->
             <ctrl:SearchItemControl Grid.Column="0"
                                     DataContext="{Binding SearchItemVM}"/>
 
-            <GridSplitter Grid.Column="1"
-                          Width="4"
-                          HorizontalAlignment="Stretch"
-                          VerticalAlignment="Stretch"
+            <GridSplitter Grid.Column="1" Width="4"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                           Background="{StaticResource BorderBrush}"
-                          Cursor="SizeWE"
-                          ShowsPreview="True"/>
+                          Cursor="SizeWE" ShowsPreview="True"/>
 
-            <!-- 우: 아이템 정보 + 슬롯 + 요약 -->
+            <!-- 우: 버튼 바 + 아이템 정보(상단) + 세트 A/B(하단) -->
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>   <!-- 아이템 헤더 -->
-                    <RowDefinition Height="*"/>      <!-- 슬롯 + 상세 -->
+                    <RowDefinition Height="Auto"/>                                  <!-- 버튼 바 -->
+                    <RowDefinition Height="160" MinHeight="80" MaxHeight="420"/>  <!-- 아이템 정보 -->
+                    <RowDefinition Height="4"/>                                    <!-- 수평 분리선 -->
+                    <RowDefinition Height="*"/>                                    <!-- 세트 A / B -->
                 </Grid.RowDefinitions>
 
-                <!-- 아이템 헤더 -->
+                <!-- ── 버튼 바: 이름 복사 / ◀ 이전 / 다음 ▶ / 상태 메시지 ── -->
                 <Border Grid.Row="0"
-                        Background="{StaticResource PanelBackgroundBrush}"
+                        Background="{StaticResource MenuBarBackgroundBrush}"
                         BorderBrush="{StaticResource BorderBrush}"
                         BorderThickness="0,0,0,1"
-                        Padding="8,6">
+                        Padding="6,3">
                     <DockPanel>
-                        <!-- 네비게이션 + 복사 (우측 고정) -->
-                        <StackPanel DockPanel.Dock="Right"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center">
+                        <!-- 상태 메시지 (우측) -->
+                        <TextBlock DockPanel.Dock="Right"
+                                   Text="{Binding StatusMessage}"
+                                   Foreground="{StaticResource SecondaryTextBrush}"
+                                   FontSize="11"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0,0,0"/>
 
-                            <!-- ◀ 이전 + 다중 선택 팝업 -->
-                            <Grid Visibility="{Binding NavPreviousVisible, Converter={StaticResource BoolToVisibilityConverter}}"
-                                  Margin="0,0,2,0">
-                                <Button x:Name="BtnSimNavPrev"
-                                        Content="◀ 이전"
+                        <!-- 이름 복사 -->
+                        <Button Content="이름 복사"
+                                Command="{Binding CopyItemNameCommand}"
+                                Style="{StaticResource SpeedButtonStyle}"
+                                Width="Auto" Height="Auto"
+                                Padding="8,3" Margin="0,0,8,0"/>
+
+                        <!-- ◀ 이전 / 다음 ▶ -->
+                        <Grid Margin="0,0,4,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Grid.Column="0">
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding NavPreviousVisible}" Value="False">
+                                                <Setter Property="Visibility" Value="Hidden"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <Button x:Name="BtnNavPrev" Content="◀ 이전"
                                         Command="{Binding NavigatePreviousCommand}"
                                         Style="{StaticResource SpeedButtonStyle}"
-                                        Width="Auto" MinHeight="28" Padding="8,4"/>
+                                        MinWidth="64" MinHeight="26" Padding="8,3"/>
                                 <Popup IsOpen="{Binding IsNavPreviousPopupOpen, Mode=TwoWay}"
-                                       PlacementTarget="{Binding ElementName=BtnSimNavPrev}"
-                                       Placement="Bottom"
-                                       StaysOpen="False"
-                                       AllowsTransparency="True">
+                                       PlacementTarget="{Binding ElementName=BtnNavPrev}"
+                                       Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
                                     <Border Background="{StaticResource ControlBackgroundBrush}"
-                                            BorderBrush="{StaticResource AccentBrush}"
-                                            BorderThickness="1"
-                                            MinWidth="200"
-                                            Padding="2">
+                                            BorderBrush="{StaticResource AccentBrush}" BorderThickness="1"
+                                            MinWidth="200" Padding="2">
                                         <ItemsControl ItemsSource="{Binding NavPreviousChoices}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Button Width="Auto" Height="Auto"
-                                                            HorizontalAlignment="Stretch"
-                                                            HorizontalContentAlignment="Left"
-                                                            Padding="8,6" Margin="0,1"
+                                                    <Button Width="Auto" Height="Auto" HorizontalAlignment="Stretch"
+                                                            HorizontalContentAlignment="Left" Padding="8,6" Margin="0,1"
                                                             Style="{StaticResource SpeedButtonStyle}"
-                                                            Command="{Binding DataContext.NavigateChoiceCommand,
-                                                                      RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            Command="{Binding DataContext.NavigateChoiceCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                             CommandParameter="{Binding}">
                                                         <StackPanel Orientation="Horizontal">
-                                                            <Border Width="28" Height="28" Margin="0,0,8,0"
+                                                            <Border Width="24" Height="24" Margin="0,0,6,0"
                                                                     Background="{StaticResource SurfaceBackgroundBrush}"
                                                                     Visibility="{Binding Image, Converter={StaticResource NullToVisibilityConverter}}">
                                                                 <Image Source="{Binding Image}" Stretch="Uniform"
@@ -178,37 +336,37 @@
                                 </Popup>
                             </Grid>
 
-                            <!-- 다음 ▶ + 다중 선택 팝업 -->
-                            <Grid Visibility="{Binding NavNextVisible, Converter={StaticResource BoolToVisibilityConverter}}"
-                                  Margin="0,0,8,0">
-                                <Button x:Name="BtnSimNavNext"
-                                        Content="다음 ▶"
+                            <Grid Grid.Column="1">
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding NavNextVisible}" Value="False">
+                                                <Setter Property="Visibility" Value="Hidden"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <Button x:Name="BtnNavNext" Content="다음 ▶"
                                         Command="{Binding NavigateNextCommand}"
                                         Style="{StaticResource SpeedButtonStyle}"
-                                        Width="Auto" MinHeight="28" Padding="8,4"/>
+                                        MinWidth="64" MinHeight="26" Padding="8,3"/>
                                 <Popup IsOpen="{Binding IsNavNextPopupOpen, Mode=TwoWay}"
-                                       PlacementTarget="{Binding ElementName=BtnSimNavNext}"
-                                       Placement="Bottom"
-                                       StaysOpen="False"
-                                       AllowsTransparency="True">
+                                       PlacementTarget="{Binding ElementName=BtnNavNext}"
+                                       Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
                                     <Border Background="{StaticResource ControlBackgroundBrush}"
-                                            BorderBrush="{StaticResource AccentBrush}"
-                                            BorderThickness="1"
-                                            MinWidth="200"
-                                            Padding="2">
+                                            BorderBrush="{StaticResource AccentBrush}" BorderThickness="1"
+                                            MinWidth="200" Padding="2">
                                         <ItemsControl ItemsSource="{Binding NavNextChoices}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Button Width="Auto" Height="Auto"
-                                                            HorizontalAlignment="Stretch"
-                                                            HorizontalContentAlignment="Left"
-                                                            Padding="8,6" Margin="0,1"
+                                                    <Button Width="Auto" Height="Auto" HorizontalAlignment="Stretch"
+                                                            HorizontalContentAlignment="Left" Padding="8,6" Margin="0,1"
                                                             Style="{StaticResource SpeedButtonStyle}"
-                                                            Command="{Binding DataContext.NavigateChoiceCommand,
-                                                                      RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                            Command="{Binding DataContext.NavigateChoiceCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                             CommandParameter="{Binding}">
                                                         <StackPanel Orientation="Horizontal">
-                                                            <Border Width="28" Height="28" Margin="0,0,8,0"
+                                                            <Border Width="24" Height="24" Margin="0,0,6,0"
                                                                     Background="{StaticResource SurfaceBackgroundBrush}"
                                                                     Visibility="{Binding Image, Converter={StaticResource NullToVisibilityConverter}}">
                                                                 <Image Source="{Binding Image}" Stretch="Uniform"
@@ -223,199 +381,114 @@
                                     </Border>
                                 </Popup>
                             </Grid>
+                        </Grid>
+                    </DockPanel>
+                </Border>
 
-                            <Button Content="이름 복사"
-                                    Command="{Binding CopyItemNameCommand}"
-                                    Style="{StaticResource SpeedButtonStyle}"
-                                    Width="Auto" Height="Auto"
-                                    Padding="6,3"/>
-                        </StackPanel>
+                <!-- ── 우 상단: 선택 아이템 정보 ───────────────────── -->
+                <Border Grid.Row="1"
+                        Background="{StaticResource PanelBackgroundBrush}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="0,0,0,0"
+                        Padding="8,6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="56"/>   <!-- 이미지 -->
+                            <ColumnDefinition Width="130"/>  <!-- 등급/이름 -->
+                            <ColumnDefinition Width="1"/>     <!-- 구분선 -->
+                            <ColumnDefinition Width="*"/>     <!-- 상세 스펙 -->
+                        </Grid.ColumnDefinitions>
 
-                        <!-- 이미지 -->
-                        <Border Width="52" Height="52"
+                        <!-- 아이템 이미지 -->
+                        <Border Grid.Column="0"
+                                Width="48" Height="48"
+                                HorizontalAlignment="Left" VerticalAlignment="Top"
                                 Background="{StaticResource ControlBackgroundBrush}"
                                 BorderBrush="{StaticResource BorderBrush}"
-                                BorderThickness="1"
-                                Margin="0,0,8,0">
+                                BorderThickness="1">
                             <Image Source="{Binding SelectedItemImage}"
                                    Stretch="Uniform"
                                    RenderOptions.BitmapScalingMode="NearestNeighbor"/>
                         </Border>
 
-                        <!-- 이름/등급/부위 -->
-                        <StackPanel VerticalAlignment="Center">
+                        <!-- 부위 / 등급 / 이름 -->
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Top"
+                                    Margin="6,2,4,0">
                             <TextBlock Text="{Binding SelectedItemPart}"
                                        Style="{StaticResource Label3dStyle}"
                                        Foreground="{StaticResource SecondaryTextBrush}"
-                                       FontSize="11"/>
+                                       FontSize="10"
+                                       TextTrimming="CharacterEllipsis"/>
                             <TextBlock Text="{Binding SelectedItemGrade}"
                                        Style="{StaticResource Label3dStyle}"
-                                       Foreground="{Binding GradeColor}"/>
+                                       Foreground="{Binding GradeColor}"
+                                       TextTrimming="CharacterEllipsis"/>
                             <TextBlock Text="{Binding SelectedItemName}"
                                        Style="{StaticResource Label3dStyle}"
-                                       TextWrapping="NoWrap"/>
+                                       TextWrapping="Wrap"/>
                         </StackPanel>
-                    </DockPanel>
-                </Border>
-
-                <!-- 하단: 슬롯 좌 | 상세 우 -->
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="230"/>
-                        <ColumnDefinition Width="4"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- 좌: 장비 슬롯 + 요약 스탯 + 유니크 옵션 -->
-                    <Grid Grid.Column="0"
-                          Background="{StaticResource PanelBackgroundBrush}">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>   <!-- 슬롯 6개 -->
-                            <RowDefinition Height="Auto"/>   <!-- 스탯 요약 -->
-                            <RowDefinition Height="*"/>      <!-- 유니크 옵션 -->
-                        </Grid.RowDefinitions>
-
-                        <!-- 슬롯 6개 -->
-                        <ItemsControl Grid.Row="0"
-                                      x:Name="SlotsItemsControl"
-                                      ItemsSource="{Binding Slots}"
-                                      Margin="4,4,4,2"
-                                      PreviewMouseRightButtonUp="SlotsItemsControl_RightClick">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                        <Button Tag="{Binding}"
-                                            Command="{Binding DataContext.SlotClickCommand, ElementName=ItemSimulatorRoot}"
-                                            CommandParameter="{Binding}"
-                                            Foreground="{Binding Foreground}"
-                                            HorizontalContentAlignment="Left"
-                                            Padding="6,4" MinHeight="30" Margin="0,0,0,2">
-                                        <!-- 우클릭 해제는 code-behind의 SlotsItemsControl_RightClick에서 처리 -->
-                                        <Button.Style>
-                                            <Style TargetType="Button" BasedOn="{StaticResource SpeedButtonStyle}">
-                                                <Setter Property="Width"  Value="Auto"/>
-                                                <Setter Property="Height" Value="Auto"/>
-                                                <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                                                <Setter Property="Padding"   Value="6,4"/>
-                                                <Setter Property="MinHeight" Value="30"/>
-                                                <Setter Property="Margin"    Value="0,0,0,2"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
-                                                        <Setter Property="Background" Value="{StaticResource AccentPressedBrush}"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Button.Style>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Image Source="{Binding Image}"
-                                                   Width="30" Height="30"
-                                                   Margin="0,0,5,0"
-                                                   RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                                   Visibility="{Binding Image, Converter={StaticResource NullToVisibilityConverter}}"/>
-                                            <TextBlock Text="{Binding Text}"
-                                                       VerticalAlignment="Center"
-                                                       TextTrimming="CharacterEllipsis"/>
-                                        </StackPanel>
-                                    </Button>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
 
                         <!-- 구분선 -->
-                        <Separator Grid.Row="0" VerticalAlignment="Bottom"
-                                   Background="{StaticResource BorderBrush}" Margin="4,0"/>
+                        <Rectangle Grid.Column="2"
+                                   Fill="{StaticResource BorderBrush}"
+                                   VerticalAlignment="Stretch"
+                                   Margin="0,2"/>
 
-                        <!-- 요약 스탯 표 -->
-                        <Grid Grid.Row="1" Margin="8,6,4,4">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <!-- 레이블 (좌) -->
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="공격력"    Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="방어력"    Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="체력"      Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="마나"      Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="힘"        Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Grid.Row="5" Grid.Column="0" Text="민첩"      Style="{StaticResource StatLabelStyle}"/>
-                            <TextBlock Grid.Row="6" Grid.Column="0" Text="지능"      Style="{StaticResource StatLabelStyle}"/>
-
-                            <!-- 값 (우) -->
-                            <TextBlock Grid.Row="0" Grid.Column="1"
-                                       Text="{Binding SummaryAttack.Text}"
-                                       Foreground="{Binding SummaryAttack.Foreground}"
-                                       FontSize="11" Margin="8,1,0,1" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1"
-                                       Text="{Binding SummaryArmor.Text}"
-                                       Foreground="{Binding SummaryArmor.Foreground}"
-                                       FontSize="11" Margin="8,1,0,1" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1"
-                                       Text="{Binding SummaryHP.Text}"
-                                       Foreground="{Binding SummaryHP.Foreground}"
-                                       FontSize="11" Margin="8,1,0,1" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1"
-                                       Text="{Binding SummaryMP.Text}"
-                                       Foreground="{Binding SummaryMP.Foreground}"
-                                       FontSize="11" Margin="8,1,0,1" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1"
-                                       Text="{Binding SummaryStrength.Text}"
-                                       Foreground="{Binding SummaryStrength.Foreground}"
-                                       FontSize="11" Margin="8,1,0,1" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="5" Grid.Column="1"
-                                       Text="{Binding SummaryAgility.Text}"
-                                       Foreground="{Binding SummaryAgility.Foreground}"
-                                       FontSize="11" Margin="8,1,0,1" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="6" Grid.Column="1"
-                                       Text="{Binding SummaryIntelligence.Text}"
-                                       Foreground="{Binding SummaryIntelligence.Foreground}"
-                                       FontSize="11" Margin="8,1,0,1" VerticalAlignment="Center"/>
-                        </Grid>
-
-                        <!-- 유니크 옵션 RichTextBox -->
-                        <RichTextBox Grid.Row="2"
-                                     x:Name="UniqueOptionsRichTextBox"
+                        <!-- 상세 스펙 RichTextBox -->
+                        <RichTextBox Grid.Column="3"
                                      IsReadOnly="True"
-                                     Background="#1E1E1E"
-                                     Foreground="#E0E0E0"
+                                     Background="Transparent"
+                                     Foreground="{StaticResource PrimaryTextBrush}"
                                      FontFamily="맑은 고딕, Malgun Gothic"
                                      FontSize="11"
-                                     Padding="8"
-                                     BorderBrush="{StaticResource BorderBrush}"
-                                     BorderThickness="0,1,0,0"
-                                     VerticalScrollBarVisibility="Auto">
+                                     BorderThickness="0"
+                                     Padding="8,0,0,0"
+                                     VerticalScrollBarVisibility="Auto"
+                                     HorizontalScrollBarVisibility="Disabled"
+                                     util:RichTextBoxHelper.Document="{Binding InfoDocument}">
                             <FlowDocument/>
                         </RichTextBox>
                     </Grid>
+                </Border>
 
-                    <GridSplitter Grid.Column="1"
-                                  Width="4"
-                                  HorizontalAlignment="Stretch"
-                                  VerticalAlignment="Stretch"
+                <!-- 수평 분리선 (아이템 정보 높이 드래그 조절) -->
+                <GridSplitter Grid.Row="2"
+                              Height="4"
+                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                              Background="{StaticResource BorderBrush}"
+                              Cursor="SizeNS" ShowsPreview="True"/>
+
+                <!-- ── 우 하단: 세트 A | 세트 B ───────────────────── -->
+                <Grid Grid.Row="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" MinWidth="200"/>
+                        <ColumnDefinition Width="4"/>
+                        <ColumnDefinition Width="*" MinWidth="200"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 세트 A -->
+                    <Border Grid.Column="0"
+                            Background="{StaticResource PanelBackgroundBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="0">
+                        <ContentControl Content="{Binding SetA}"
+                                        ContentTemplate="{StaticResource SimulatorSetTemplate}"/>
+                    </Border>
+
+                    <GridSplitter Grid.Column="1" Width="4"
+                                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                   Background="{StaticResource BorderBrush}"
-                                  Cursor="SizeWE"/>
+                                  Cursor="SizeWE" ShowsPreview="True"/>
 
-                    <!-- 우: 아이템 상세 RichTextBox -->
-                    <RichTextBox Grid.Column="2"
-                                 x:Name="InfoDetailRichTextBox"
-                                 IsReadOnly="True"
-                                 Background="#1E1E1E"
-                                 Foreground="#E0E0E0"
-                                 FontFamily="맑은 고딕, Malgun Gothic"
-                                 FontSize="12"
-                                 Padding="8"
-                                 BorderThickness="0"
-                                 VerticalScrollBarVisibility="Auto">
-                        <FlowDocument/>
-                    </RichTextBox>
+                    <!-- 세트 B -->
+                    <Border Grid.Column="2"
+                            Background="{StaticResource PanelBackgroundBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1,0,0,0">
+                        <ContentControl Content="{Binding SetB}"
+                                        ContentTemplate="{StaticResource SimulatorSetTemplate}"/>
+                    </Border>
                 </Grid>
             </Grid>
         </Grid>
