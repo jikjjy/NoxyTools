@@ -4,7 +4,11 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.0.0/)를 따르며,  
 버전 규칙은 [Semantic Versioning](https://semver.org/lang/ko/)을 따릅니다.
 
-## [0.4.0] - 2026-05-10 (Unreleased)
+## [0.4.0] - 2026-05-10
+
+### 추가
+- 아이템 시뮬레이션 탭에 A, B 셋 비교 기능 추가
+- 아이템 검색 탭 레이아웃 변경
 
 ## [0.3.5] - 2026-05-10
 

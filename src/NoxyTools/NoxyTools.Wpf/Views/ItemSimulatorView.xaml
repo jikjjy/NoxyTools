@@ -256,7 +256,7 @@
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>                                  <!-- 버튼 바 -->
-                    <RowDefinition Height="160" MinHeight="80" MaxHeight="420"/>  <!-- 아이템 정보 -->
+                    <RowDefinition Height="300" MinHeight="80" MaxHeight="420"/>  <!-- 아이템 정보 -->
                     <RowDefinition Height="4"/>                                    <!-- 수평 분리선 -->
                     <RowDefinition Height="*"/>                                    <!-- 세트 A / B -->
                 </Grid.RowDefinitions>
