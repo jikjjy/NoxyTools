@@ -12,6 +12,7 @@
     <UserControl.Resources>
         <conv:NullToVisibilityConverter  x:Key="NullToVisibilityConverter"/>
         <conv:BoolToVisibilityConverter  x:Key="BoolToVisibilityConverter"/>
+        <conv:BoolToVisibilityConverter  x:Key="InvertedBoolToVisibilityConverter" Invert="True"/>
 
         <!-- 3D 텍스트 효과 스타일 -->
         <Style x:Key="Label3dStyle" TargetType="TextBlock">
@@ -314,38 +315,80 @@
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Button Margin="0,0,4,4"
-                                                        Padding="8,5"
-                                                        MinHeight="42"
-                                                        Width="Auto" Height="Auto"
-                                                        Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        Command="{Binding DataContext.SelectMaterialButtonCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        CommandParameter="{Binding}">
-                                                    <Button.ContextMenu>
-                                                        <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-                                                            <MenuItem Header="아이템 찾기"
-                                                                      Command="{Binding SelectMaterialButtonCommand}"
-                                                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                                        </ContextMenu>
-                                                    </Button.ContextMenu>
-                                                    <Button.Style>
-                                                        <Style TargetType="Button" BasedOn="{StaticResource SpeedButtonStyle}">
+                                                <ContentControl Content="{Binding}">
+                                                    <ContentControl.Resources>
+                                                        <!-- 구분자 레이블 템플릿 -->
+                                                        <DataTemplate x:Key="SeparatorTemplate">
+                                                            <Border BorderBrush="#FFCC44" BorderThickness="2,0,0,0"
+                                                                    Margin="6,2,6,4" Padding="5,3"
+                                                                    VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Text}"
+                                                                           Foreground="#FFCC44"
+                                                                           FontSize="11"
+                                                                           FontWeight="SemiBold"
+                                                                           VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                        <!-- 일반/대체 재료 버튼 템플릿 -->
+                                                        <DataTemplate x:Key="ButtonTemplate">
+                                                            <Button Margin="0,0,4,4"
+                                                                    Padding="8,5"
+                                                                    MinHeight="42"
+                                                                    Width="Auto" Height="Auto"
+                                                                    Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                    Command="{Binding DataContext.SelectMaterialButtonCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                    CommandParameter="{Binding}">
+                                                                <Button.ContextMenu>
+                                                                    <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                                                        <MenuItem Header="아이템 찾기"
+                                                                                  Command="{Binding SelectMaterialButtonCommand}"
+                                                                                  CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                                                    </ContextMenu>
+                                                                </Button.ContextMenu>
+                                                                <Button.Style>
+                                                                    <Style TargetType="Button" BasedOn="{StaticResource SpeedButtonStyle}">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                                <Setter Property="Background" Value="{StaticResource AccentPressedBrush}"/>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding IsSubstitute}" Value="True">
+                                                                                <Setter Property="BorderBrush" Value="#FFCC44"/>
+                                                                                <Setter Property="BorderThickness" Value="1.5"/>
+                                                                            </DataTrigger>
+                                                                            <MultiDataTrigger>
+                                                                                <MultiDataTrigger.Conditions>
+                                                                                    <Condition Binding="{Binding IsSubstitute}" Value="True"/>
+                                                                                    <Condition Binding="{Binding IsSelected}" Value="True"/>
+                                                                                </MultiDataTrigger.Conditions>
+                                                                                <Setter Property="Background" Value="{StaticResource AccentPressedBrush}"/>
+                                                                                <Setter Property="BorderBrush" Value="#FFCC44"/>
+                                                                                <Setter Property="BorderThickness" Value="2"/>
+                                                                            </MultiDataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Button.Style>
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <Image Source="{Binding Image}"
+                                                                           Width="36" Height="36"
+                                                                           Margin="0,0,6,0"
+                                                                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                                                           Visibility="{Binding Image, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                                                    <TextBlock Text="{Binding Text}" VerticalAlignment="Center"/>
+                                                                </StackPanel>
+                                                            </Button>
+                                                        </DataTemplate>
+                                                    </ContentControl.Resources>
+                                                    <ContentControl.Style>
+                                                        <Style TargetType="ContentControl">
+                                                            <Setter Property="ContentTemplate" Value="{StaticResource ButtonTemplate}"/>
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                                    <Setter Property="Background" Value="{StaticResource AccentPressedBrush}"/>
+                                                                <DataTrigger Binding="{Binding IsSeparator}" Value="True">
+                                                                    <Setter Property="ContentTemplate" Value="{StaticResource SeparatorTemplate}"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
-                                                    </Button.Style>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Image Source="{Binding Image}"
-                                                               Width="36" Height="36"
-                                                               Margin="0,0,6,0"
-                                                               RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                                               Visibility="{Binding Image, Converter={StaticResource NullToVisibilityConverter}}"/>
-                                                        <TextBlock Text="{Binding Text}" VerticalAlignment="Center"/>
-                                                    </StackPanel>
-                                                </Button>
+                                                    </ContentControl.Style>
+                                                </ContentControl>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>

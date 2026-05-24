@@ -20,11 +20,20 @@ public partial class ButtonItemVM : ObservableObject
 
     [ObservableProperty] private bool _isSelected;
 
-    public ButtonItemVM(ItemSet item, string text, string? imageUrl = null, BitmapSource? image = null)
+    /// <summary>true 일 때 대체 재료 버튼으로 표시됩니다.</summary>
+    [ObservableProperty] private bool _isSubstitute;
+
+    /// <summary>true 일 때 버튼이 아닌 구분자 레이블로 표시됩니다.</summary>
+    [ObservableProperty] private bool _isSeparator;
+
+    public ButtonItemVM(ItemSet item, string text, string? imageUrl = null, BitmapSource? image = null,
+        bool isSubstitute = false, bool isSeparator = false)
     {
         Item = item;
         Text = text;
         ImageUrl = imageUrl;
         _image = image;
+        _isSubstitute = isSubstitute;
+        _isSeparator = isSeparator;
     }
 }

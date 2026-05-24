@@ -144,18 +144,18 @@ internal static class ItemInfoWpfExtensions
 
         var before = item.BeforeItems[0];
         var sb = new System.Text.StringBuilder();
-        sb.Append($"「{before.CraftRecipe.Location.Name}」\t[{item.Grade.Name}]{item.Name} = ");
-        sb.Append($"([{before.Grade.Name}]{before.Name}");
+        sb.Append($"「{before.CraftRecipe.Location.Name}」\t{FullName(item)} = ");
+        sb.Append("{" + FullName(before));
         for (int i = 1; i < item.BeforeItems.Count; i++)
-            sb.Append($" or [{item.BeforeItems[i].Grade.Name}]{item.BeforeItems[i].Name}");
-        sb.Append(")");
+            sb.Append($" or {FullName(item.BeforeItems[i])}");
+        sb.Append("}");
         foreach (var mat in before.CraftRecipe.Materials)
-            sb.Append($" + {mat.Name}");
-        if (before.CraftRecipe.SubstituteMaterials.Count > 0)
+            sb.Append($" + {ShortName(mat)}");
+        foreach (var subGroup in before.CraftRecipe.SubstituteMaterials)
         {
-            sb.Append(" + (");
-            sb.Append(string.Join(" or ", before.CraftRecipe.SubstituteMaterials.First().Select(s => s.Name)));
-            sb.Append(")");
+            sb.Append(" + {");
+            sb.Append(string.Join(" or ", subGroup.Select(s => ShortName(s))));
+            sb.Append("}");
         }
         if (before.CraftRecipe.SuccessProbability.HasValue)
             sb.Append($" [성공률: {before.CraftRecipe.SuccessProbability.Value:0}%]");
@@ -214,25 +214,27 @@ internal static class ItemInfoWpfExtensions
             ItemSet dest = item.CraftDestinations.Find(d => allNames.Contains(d.Name)) ?? finalItem;
 
             var para = new Paragraph { Margin = new Thickness(0) };
-            AppendDefault(para, $"「{item.CraftRecipe.Location.Name}」\t[{dest.Grade.Name}]{dest.Name} = ");
-            AppendDefault(para, "{" + string.Join(" or ", dest.BeforeItems.Select(b => $"[{b.Grade.Name}]{b.Name}")) + "}");
+            AppendDefault(para, $"「{item.CraftRecipe.Location.Name}」\t{FullName(dest)} = ");
+            AppendDefault(para, "{" + string.Join(" or ", dest.BeforeItems.Select(b => FullName(b))) + "}");
 
             if (item.CraftRecipe.Materials.Count > 0)
                 AppendDefault(para, " + " + nl);
 
             string MatText(ItemSet m)
             {
+                string gamble = m.Grade.Name == "보조-도박" && m.BeforeItems.Count > 0
+                    ? $"({m.BeforeItems[0].Name})" : "";
                 string drop = detailOption && m.DropCreeps.Count > 0
                     ? $" (드랍: {string.Join(", ", m.DropCreeps.Select(d => d.Name))})" : "";
-                return m.Name + drop;
+                return m.Name + gamble + drop;
             }
 
             AppendDefault(para, string.Join(" + " + nl, item.CraftRecipe.Materials.Select(MatText)));
 
-            if (item.CraftRecipe.SubstituteMaterials.Count > 0)
+            foreach (var subGroup in item.CraftRecipe.SubstituteMaterials)
             {
                 AppendDefault(para, " + {");
-                AppendDefault(para, string.Join(" or ", item.CraftRecipe.SubstituteMaterials.First().Select(MatText)));
+                AppendDefault(para, string.Join(" or ", subGroup.Select(MatText)));
                 AppendDefault(para, "}" + nl);
             }
 
@@ -394,6 +396,24 @@ internal static class ItemInfoWpfExtensions
 
     private static void AppendDefault(Paragraph para, string text) =>
         para.Inlines.Add(new Run(text) { Foreground = FgDefault });
+
+    /// <summary>[등급]이름 형식. [보조-도박] 등급이면 도박 재료 이름을 괄호로 추가합니다.</summary>
+    private static string FullName(ItemSet item)
+    {
+        string s = $"[{item.Grade.Name}]{item.Name}";
+        if (item.Grade.Name == "보조-도박" && item.BeforeItems.Count > 0)
+            s += $"({item.BeforeItems[0].Name})";
+        return s;
+    }
+
+    /// <summary>이름만 형식. [보조-도박] 등급이면 도박 재료 이름을 괄호로 추가합니다.</summary>
+    private static string ShortName(ItemSet item)
+    {
+        string s = item.Name;
+        if (item.Grade.Name == "보조-도박" && item.BeforeItems.Count > 0)
+            s += $"({item.BeforeItems[0].Name})";
+        return s;
+    }
 
     private static SolidColorBrush GradeBrush(System.Drawing.Color c)
     {

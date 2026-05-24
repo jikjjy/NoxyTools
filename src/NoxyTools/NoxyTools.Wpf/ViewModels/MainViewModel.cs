@@ -91,10 +91,38 @@ public partial class MainViewModel : ViewModelBase
 
         CraftRecipeDbVersion = _config.GoogleSheetCraftRecipeVersion;
 
+        // 탭 간 아이템 선택 동기화 (아이템 검색 ↔ 아이템 시뮬레이터 ↔ 파밍 도우미)
+        _noxypediaSearchVm.SearchItemVM.SelectedItemChanged += (_, item) => SyncTabSelection(item);
+        _itemSimulatorVm.SearchItemVM.SelectedItemChanged   += (_, item) => SyncTabSelection(item);
+        _farmingSimulatorVm.SearchItemVM.SelectedItemChanged += (_, item) => SyncTabSelection(item);
+
         // 초기 화면: 아이템 인증 도우미
         SelectMakeValidReport();
     }
 
+    // --- 탭 간 선택 동기화 ---
+
+    private bool _isSyncingTabs;
+
+    /// <summary>
+    /// 한 탭에서 아이템이 선택되면 다른 탭의 검색 패널도 같은 아이템을 선택합니다.
+    /// 순환 호출을 막기 위해 _isSyncingTabs 플래그를 사용합니다.
+    /// </summary>
+    private void SyncTabSelection(Noxypedia.Model.ItemSet item)
+    {
+        if (_isSyncingTabs) return;
+        _isSyncingTabs = true;
+        try
+        {
+            _noxypediaSearchVm.SearchItemVM.ForceSelectItem(item);
+            _itemSimulatorVm.SearchItemVM.ForceSelectItem(item);
+            _farmingSimulatorVm.SearchItemVM.ForceSelectItem(item);
+        }
+        finally
+        {
+            _isSyncingTabs = false;
+        }
+    }
 
     // --- 시작 시 데이터 로딩 ---
 

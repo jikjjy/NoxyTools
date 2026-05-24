@@ -304,19 +304,47 @@ public partial class NoxypediaSearchViewModel : ViewModelBase
             var before = item.BeforeItems[0];
             foreach (var mat in before.CraftRecipe.Materials)
             {
+                string matLabel = $"[{mat.Grade.Name}]{mat.Name}";
+                if (mat.Grade.Name == "보조-도박" && mat.BeforeItems.Count > 0)
+                    matLabel += $"({mat.BeforeItems[0].Name})";
                 CraftMaterials.Add(new ButtonItemVM(
                     mat,
-                    $"[{mat.Grade.Name}]{mat.Name}",
+                    matLabel,
                     imageUrl: GetItemImageUrl(mat),
                     image: GetItemImage(mat)));
+            }
+            // 대체 재료 그룹도 버튼으로 추가 (시각적으로 그룹 안내)
+            var subMats = before.CraftRecipe.SubstituteMaterials;
+            if (subMats.Count > 0)
+            {
+                CraftMaterials.Add(new ButtonItemVM(new ItemSet(), "대체 재료", isSeparator: true));
+                for (int gi = 0; gi < subMats.Count; gi++)
+                {
+                    if (gi > 0)
+                        CraftMaterials.Add(new ButtonItemVM(new ItemSet(), "+", isSeparator: true));
+                    foreach (var sub in subMats[gi])
+                    {
+                        string subLabel = $"[{sub.Grade.Name}]{sub.Name}";
+                        if (sub.Grade.Name == "보조-도박" && sub.BeforeItems.Count > 0)
+                            subLabel += $"({sub.BeforeItems[0].Name})";
+                        CraftMaterials.Add(new ButtonItemVM(
+                            sub, subLabel,
+                            imageUrl: GetItemImageUrl(sub),
+                            image: GetItemImage(sub),
+                            isSubstitute: true));
+                    }
+                }
             }
         }
         if (CraftMaterials.Count == 0)
         {
             // 재료 없으면 자기 자신
+            string selfLabel = $"[{item.Grade.Name}]{item.Name}";
+            if (item.Grade.Name == "보조-도박" && item.BeforeItems.Count > 0)
+                selfLabel += $"({item.BeforeItems[0].Name})";
             CraftMaterials.Add(new ButtonItemVM(
                 item,
-                $"[{item.Grade.Name}]{item.Name}",
+                selfLabel,
                 imageUrl: GetItemImageUrl(item),
                 image: GetItemImage(item)));
         }
@@ -331,9 +359,13 @@ public partial class NoxypediaSearchViewModel : ViewModelBase
 
     private void SelectMaterial(ButtonItemVM vm)
     {
+        if (vm.IsSeparator) return;   // 구분자 아이템은 무시
         foreach (var b in CraftMaterials) b.IsSelected = false;
         vm.IsSelected = true;
-        _craftContextItem = vm.Item;
+        // [보조-도박] 등급이면 실제 획득 대상은 [재료-도박] 아이템(BeforeItems[0])
+        _craftContextItem = (vm.Item.Grade.Name == "보조-도박" && vm.Item.BeforeItems.Count > 0)
+            ? vm.Item.BeforeItems[0]
+            : vm.Item;
 
         CraftRegions.Clear();
         MapImage = null;
