@@ -31,6 +31,9 @@
         <DataTemplate DataType="{x:Type vm:ItemSimulatorViewModel}">
             <views:ItemSimulatorView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:FarmingSimulatorViewModel}">
+            <views:FarmingSimulatorView/>
+        </DataTemplate>
     </Window.Resources>
 
     <WindowChrome.WindowChrome>
@@ -139,7 +142,7 @@
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Left"
                             WindowChrome.IsHitTestVisibleInChrome="True">
-                    <RadioButton Content="아이템 인증 도우미"
+                    <RadioButton Content="인증 도우미"
                                  Style="{StaticResource TabRadioButtonStyle}"
                                  IsChecked="{Binding IsMakeValidReportSelected}"
                                  Command="{Binding SelectMakeValidReportCommand}"/>
@@ -151,6 +154,10 @@
                                  Style="{StaticResource TabRadioButtonStyle}"
                                  IsChecked="{Binding IsItemSimulatorSelected}"
                                  Command="{Binding SelectItemSimulatorCommand}"/>
+                    <RadioButton Content="파밍 도우미"
+                                 Style="{StaticResource TabRadioButtonStyle}"
+                                 IsChecked="{Binding IsFarmingSimulatorSelected}"
+                                 Command="{Binding SelectFarmingSimulatorCommand}"/>
                 </StackPanel>
             </DockPanel>
         </Border>

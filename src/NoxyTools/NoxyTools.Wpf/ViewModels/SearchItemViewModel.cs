@@ -92,6 +92,13 @@ public partial class SearchItemViewModel : ViewModelBase
     /// <summary>선택 아이템 변경 이벤트 (부모 VM 알림용)</summary>
     public event EventHandler<ItemSet>? SelectedItemChanged;
 
+    /// <summary>목록에서 아이템을 더블클릭했을 때 발생하는 이벤트.</summary>
+    public event EventHandler<ItemSet>? ItemDoubleClicked;
+
+    /// <summary>코드비하인드(SearchItemControl)에서 더블클릭 시 호출합니다.</summary>
+    internal void RaiseItemDoubleClicked(ItemSet item) =>
+        ItemDoubleClicked?.Invoke(this, item);
+
     // ─────────────────────────────────────────────────────────────
     public SearchItemViewModel(FavoriteService favoriteService)
     {

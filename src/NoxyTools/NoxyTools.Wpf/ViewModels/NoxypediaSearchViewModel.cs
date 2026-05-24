@@ -234,6 +234,30 @@ public partial class NoxypediaSearchViewModel : ViewModelBase
             SelectMaterial(CraftMaterials[0]);
     }
 
+    /// <summary>
+    /// 파밍 시뮬레이터 등 외부에서 아이템 정보를 강제 갱신합니다.
+    /// 이미 선택된 아이템이더라도 정보를 재계산합니다.
+    /// </summary>
+    public void SelectItemForDisplay(ItemSet item)
+    {
+        if (item == null) return;
+        if (SearchItemVM.SelectedItem == item)
+        {
+            // 이미 선택된 아이템 → 이벤트 없이 직접 갱신
+            _currentItem = item;
+            _craftContextItem = new();
+            UpdateInfoTab();
+            UpdateCraftTab();
+            UpdateTechTab();
+            if (CraftMaterials.Count > 0)
+                SelectMaterial(CraftMaterials[0]);
+        }
+        else
+        {
+            SearchItemVM.ForceSelectItem(item);  // OnSearchItemSelected 가 처리
+        }
+    }
+
     // ── 기본 정보 탭 ─────────────────────────────────────────────────────
 
     private void UpdateInfoTab()

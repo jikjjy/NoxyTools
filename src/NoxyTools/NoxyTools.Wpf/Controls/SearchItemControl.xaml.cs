@@ -33,5 +33,14 @@ namespace NoxyTools.Wpf.Controls
                     System.Windows.Threading.DispatcherPriority.Background);
             }
         }
+        private void ItemDataGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is DataGrid dg
+                && dg.SelectedItem is Noxypedia.Model.ItemSet item
+                && DataContext is SearchItemViewModel vm)
+            {
+                vm.RaiseItemDoubleClicked(item);
+            }
+        }
     }
 }

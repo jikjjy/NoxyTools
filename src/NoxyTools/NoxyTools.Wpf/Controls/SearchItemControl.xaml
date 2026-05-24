@@ -208,6 +208,7 @@
                   SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                   RowStyle="{StaticResource GradeRowStyle}"
                   SelectionChanged="ItemDataGrid_SelectionChanged"
+                  MouseDoubleClick="ItemDataGrid_MouseDoubleClick"
                   VirtualizingPanel.IsVirtualizing="True"
                   VirtualizingPanel.VirtualizationMode="Recycling"
                   EnableRowVirtualization="True">

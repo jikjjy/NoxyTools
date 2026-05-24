@@ -4,7 +4,10 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.0.0/)를 따르며,  
 버전 규칙은 [Semantic Versioning](https://semver.org/lang/ko/)을 따릅니다.
 
-## [0.4.1] - 2026-05-24 (Unreleased)
+## [0.5.0] - 2026-05-24
+
+### 추가
+- 파밍 도우미 기능 추가
 
 ### 수정
 - 데이터베이스 업데이트

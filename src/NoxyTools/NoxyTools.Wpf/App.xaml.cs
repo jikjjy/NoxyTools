@@ -103,6 +103,7 @@ public partial class App : Application
         // MakeValidReport: Singleton — FileSystemWatcher + DispatcherTimer 생명주기 관리
         services.AddSingleton<MakeValidReportViewModel>();
         services.AddSingleton<ItemSimulatorViewModel>();
+        services.AddSingleton<FarmingSimulatorViewModel>();
 
         // --- Views ---
         services.AddTransient<MainWindow>();

@@ -20,6 +20,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly MakeValidReportViewModel _makeValidReportVm;
     private readonly NoxypediaSearchViewModel _noxypediaSearchVm;
     private readonly ItemSimulatorViewModel _itemSimulatorVm;
+    private readonly FarmingSimulatorViewModel _farmingSimulatorVm;
     private readonly UpdateViewModel _updateVm;
 
     private DispatcherTimer? _statusTimer;
@@ -51,6 +52,9 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isItemSimulatorSelected;
 
+    [ObservableProperty]
+    private bool _isFarmingSimulatorSelected;
+
     /// <summary>구글 시트에 업데이트된 조합법 레시피가 있을 때 true</summary>
     [ObservableProperty]
     private bool _isCraftRecipeUpdateAvailable;
@@ -70,6 +74,7 @@ public partial class MainViewModel : ViewModelBase
         MakeValidReportViewModel makeValidReportVm,
         NoxypediaSearchViewModel noxypediaSearchVm,
         ItemSimulatorViewModel itemSimulatorVm,
+        FarmingSimulatorViewModel farmingSimulatorVm,
         UpdateViewModel updateVm)
     {
         _navigation = navigation;
@@ -78,6 +83,7 @@ public partial class MainViewModel : ViewModelBase
         _makeValidReportVm = makeValidReportVm;
         _noxypediaSearchVm = noxypediaSearchVm;
         _itemSimulatorVm = itemSimulatorVm;
+        _farmingSimulatorVm = farmingSimulatorVm;
         _updateVm = updateVm;
 
         var ver = Assembly.GetEntryAssembly()?.GetName().Version;
@@ -104,6 +110,7 @@ public partial class MainViewModel : ViewModelBase
             await Task.Run(() => _cache.LoadNoxypediaData(_config, datPath));
             _noxypediaSearchVm.OnDataLoaded();
             _itemSimulatorVm.OnDataLoaded();
+            _farmingSimulatorVm.OnDataLoaded();
             StopLoading("DB 로드 완료");
 
             // 최초 실행이거나 앱이 업데이트된 경우 → 자동 동기화
@@ -178,6 +185,7 @@ public partial class MainViewModel : ViewModelBase
         IsMakeValidReportSelected = true;
         IsNoxypediaSearchSelected = false;
         IsItemSimulatorSelected = false;
+        IsFarmingSimulatorSelected = false;
         _navigation.NavigateTo<MakeValidReportViewModel>();
         SetStatus("아이템 인증 도우미");
     }
@@ -188,6 +196,7 @@ public partial class MainViewModel : ViewModelBase
         IsMakeValidReportSelected = false;
         IsNoxypediaSearchSelected = true;
         IsItemSimulatorSelected = false;
+        IsFarmingSimulatorSelected = false;
         _navigation.NavigateTo<NoxypediaSearchViewModel>();
         SetStatus("아이템 검색");
     }
@@ -198,8 +207,20 @@ public partial class MainViewModel : ViewModelBase
         IsMakeValidReportSelected = false;
         IsNoxypediaSearchSelected = false;
         IsItemSimulatorSelected = true;
+        IsFarmingSimulatorSelected = false;
         _navigation.NavigateTo<ItemSimulatorViewModel>();
         SetStatus("아이템 시뮬레이터");
+    }
+
+    [RelayCommand]
+    private void SelectFarmingSimulator()
+    {
+        IsMakeValidReportSelected = false;
+        IsNoxypediaSearchSelected = false;
+        IsItemSimulatorSelected = false;
+        IsFarmingSimulatorSelected = true;
+        _navigation.NavigateTo<FarmingSimulatorViewModel>();
+        SetStatus("파밍 시뮬레이터");
     }
 
     // --- 설정 백업 / 복구 ---
@@ -262,6 +283,7 @@ public partial class MainViewModel : ViewModelBase
         if (IsMakeValidReportSelected) SelectMakeValidReport();
         else if (IsNoxypediaSearchSelected) SelectNoxypediaSearch();
         else if (IsItemSimulatorSelected) SelectItemSimulator();
+        else if (IsFarmingSimulatorSelected) SelectFarmingSimulator();
     }
 
     // --- 구글 시트 동기화 (조합법 + 드랍 테이블) ---
